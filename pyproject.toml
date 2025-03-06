@@ -12,6 +12,7 @@ dependencies = [
     "pandas>=2.2.3",
     "pillow>=11.1.0",
     "pytest>=8.3.5",
+    "scikit-learn>=1.6.1",
     "scipy>=1.15.2",
     "seaborn>=0.13.2",
     "sns>=0.1",

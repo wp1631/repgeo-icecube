@@ -1,50 +1,46 @@
-import seaborn as sns
 import numpy as np
 from scipy.stats import vonmises
-from typing import Any, Literal
-from functools import partial
-import cv2
-import inspect
-import matplotlib.pyplot as plt
+from itertools import product
+from sklearn.manifold import MDS
+from matplotlib import pyplot as plt 
+
+TOPOG_MIN = 0
+TOPOG_MAX = 100
+TOPOG_NUM = 100
+topographic_base_space = np.linspace(TOPOG_MIN, TOPOG_MAX, TOPOG_NUM)
+
+BASIS_MIN = 20
+BASIS_MAX = 80
+BASIS_NUM = 100
+basis_base_space = np.linspace(BASIS_MIN, BASIS_MAX, BASIS_NUM)
+
+NEURON_PARAMS = [
+    item
+    for item in product(
+        topographic_base_space, topographic_base_space, basis_base_space
+    )
+]
 
 
-def generate_axis(start: int | float, stop: int | float, num: int = 100):
-    return np.linspace(start, stop, num)
+CHANNEL_NUM = 10
+CHANNEL_MAX = 100
+CHANNEL_MIN = 0
+hypotethic_channel_loc = np.linspace(CHANNEL_MIN, CHANNEL_MAX, CHANNEL_NUM)
 
+STIM_MIN = 0
+STIM_MAX = 100
+STIM_NUM = 1000
+stimulus_base_space = np.linspace(STIM_MIN, STIM_MAX, STIM_NUM)
 
-def repeat_axes(dim: int, start: int | float, stop: int | float, num: int = 100):
-    return np.repeat(generate_axis(start, stop, num), dim)
+KAPPA = 3
+hypothetic_stimulus_space = stimulus_base_space # Here we use identity -> indicating case where hypothesis space form complete information of the system
+hypothetic_channel_response = np.empty(shape = (STIM_NUM, CHANNEL_NUM))
 
+for idx,loc in enumerate(hypotethic_channel_loc):
+    hypothetic_channel_response[:,idx] = vonmises.pdf(hypothetic_stimulus_space, loc=loc, kappa = KAPPA).T
 
-def generate_neuron_descriptions(
-    axes: np.ndarray,
-    receptive_field_size: int | float,
-    orientation_tuning: int | float,
-    orientation_width: int | float,
-):
-    return ...
+embedding = MDS(n_components=2)
+X_transformed = embedding.fit_transform(hypothetic_channel_response)
 
-
-class Neuron:
-    _loc: tuple
-    _receptive_size: int | float
-    _orientation_loc: int | float
-    _oreintation_width: int | float
-
-
-# Create an array from the
-generated_axes = []
-stimulus_vals = np.linspace(0, np.pi, 100)
-
-
-def tuned_neuron(
-    loc: int | float = 0, kappa: int | float = 1, units: Literal["deg", "rad"] = "rad"
-) -> Any:
-    if units == "deg":
-        loc = loc * np.pi / 180
-    return partial(vonmises.pdf, loc=loc, kappa=kappa)
-
-
-# neurons = [tuned_neuron(loc) for loc in np.linspace(0, np.pi, 10)]
-# activities = np.array([neuron(stimulus_vals) for neuron in neurons])
-# print(activities)
+plt.scatter(X_transformed[:,0], X_transformed[:,1])
+plt.show()
