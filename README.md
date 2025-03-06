@@ -11,8 +11,15 @@ The steps are following:
 2. Simulate the visual responses integrated to V1 information using Gabor filters in python opencv2
 3. Identify the information/constructional changes along the processing steps
 
-```python 
-The cv2.getGaborKernel(ksize, sigma, theta, lambd, gamma, psi, ktype = cv2.CV_32F)
+```mermaid
+    flowchart TD
+      SE[Ext. Stimulus] -->N[Neural Response]
+      SI[Int. Stimulus] --> HS[Hypothetical Stimulus Property]
+      SE --> HS
+      HS --> CR[Channel Response]
+      CR <-.->|IEM| M[Measurement]
+      SI --> N
+      N -->|topographic weight| M
 ```
 
 
