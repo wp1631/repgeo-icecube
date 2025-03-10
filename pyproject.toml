@@ -1,0 +1,22 @@
+[project]
+name = "repgeo"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "colorama>=0.4.6",
+    "icecream>=2.1.4",
+    "numpy>=2.2.3",
+    "opencv-python>=4.11.0.86",
+    "pandas>=2.2.3",
+    "pillow>=11.1.0",
+    "plotly>=6.0.0",
+    "pytest>=8.3.5",
+    "scikit-learn>=1.6.1",
+    "scipy>=1.15.2",
+    "seaborn>=0.13.2",
+    "sns>=0.1",
+    "torch>=2.6.0",
+    "torchvision>=0.21.0",
+]
