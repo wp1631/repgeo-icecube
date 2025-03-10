@@ -11,9 +11,9 @@ TOPOG_NUM = 100
 topographic_base_space = np.linspace(TOPOG_MIN, TOPOG_MAX, TOPOG_NUM)
 
 # Neural tuning space
-BASIS_MIN = 20
-BASIS_MAX = 80
-BASIS_NUM = 1000
+BASIS_MIN = 0
+BASIS_MAX = 100
+BASIS_NUM = 100
 basis_base_space = np.linspace(BASIS_MIN, BASIS_MAX, BASIS_NUM)
 
 # Neuron parameters as the cartesian product of the two
@@ -25,7 +25,7 @@ NEURON_PARAMS = [
 ]
 
 # Hypothetical Channel defined on hypothetical stimulus space derived from stimulus
-CHANNEL_NUM = 20
+CHANNEL_NUM = 200
 CHANNEL_MAX = 2 * np.pi
 CHANNEL_MIN = 0
 hypotethic_channel_loc = np.linspace(CHANNEL_MIN, CHANNEL_MAX, CHANNEL_NUM)
@@ -33,7 +33,7 @@ hypotethic_channel_loc = np.linspace(CHANNEL_MIN, CHANNEL_MAX, CHANNEL_NUM)
 # Derived hypothetical stimulus properties
 STIM_MIN = 0
 STIM_MAX = 2 * np.pi
-STIM_NUM = 1000
+STIM_NUM = 100
 stimulus_base_space = np.linspace(STIM_MIN, STIM_MAX, STIM_NUM)
 
 # Hypothetical Channel Response
@@ -58,8 +58,8 @@ for idx, loc in enumerate(basis_base_space):
 neural_response += np.random.normal(0, 1 / NEURON_KAPPA, neural_response.shape)
 
 ## The fMRI synthetic (plain wrong but serve purpose)
-MEASUREMENT_DIM_LIST = np.logspace(0, 3, 10).astype(int)
-DIM_TRIALS = 500
+MEASUREMENT_DIM_LIST = np.logspace(0, 3, 100).astype(int)
+DIM_TRIALS = 10
 
 # Loop to get statistics
 dim_list = []
@@ -68,8 +68,10 @@ enc_err_list = []
 enc_mat_list = []
 ienc_mat_list = []
 test_measurement_list = []
+predict_measurement_list = []
 recovered_resp_list = []
 base_neural_resp_list = []
+noise_list = []
 
 for m_dim in MEASUREMENT_DIM_LIST:
     for i in range(DIM_TRIALS):
@@ -77,7 +79,7 @@ for m_dim in MEASUREMENT_DIM_LIST:
         dim_list.append(m_dim)
         trial_list.append(i + 1)
         MEASUREMENT_DIM = m_dim
-        MEASUREMENT_NOISE_SD = 0.2
+        MEASUREMENT_NOISE_SD = 0.05
         transformation_matrix = np.abs(
             np.random.normal(0, 1, size=(BASIS_NUM, MEASUREMENT_DIM))
         )
@@ -91,6 +93,8 @@ for m_dim in MEASUREMENT_DIM_LIST:
         ## IEM Recovery
         iem_encoding_mat = lstsq(hypothetic_channel_response, measurement_signal)[0]
         predicted_signal = np.matmul(hypothetic_channel_response, iem_encoding_mat)
+        predict_measurement_list.append(predicted_signal)
+
         encoding_err = np.sqrt(np.mean((predicted_signal - measurement_signal) ** 2))
         enc_err_list.append(encoding_err)
         enc_mat_list.append(iem_encoding_mat)
@@ -100,11 +104,12 @@ for m_dim in MEASUREMENT_DIM_LIST:
 
         base_neural_resp_list.append(neural_response)
         test_measurement_data = np.matmul(neural_response, transformation_matrix)
-        test_measurement_data += np.random.normal(
+        add_noise = np.random.normal(
             0,
             MEASUREMENT_NOISE_SD / np.sqrt(MEASUREMENT_DIM),
             size=test_measurement_data.shape,
         )
+        test_measurement_data += add_noise
         test_measurement_list.append(test_measurement_data)
 
         recovered_channel_resp = np.matmul(test_measurement_data, inverted_encoding_mat)
@@ -117,11 +122,13 @@ exp_data = {
     "enc_mat": enc_mat_list,
     "ienc_mat": ienc_mat_list,
     "test_measure_data": test_measurement_list,
-    "rec_resp_list": recovered_resp_list,
+    "rec_resp": recovered_resp_list,
     "base_neural_resp": neural_response,
+    "noise": noise_list,
+    "predict_measure_data": predict_measurement_list
 }
 
 print("done")
 
-with open("./temp/exp_data.pkl", "wb") as file:
+with open("temp/exp_data.pkl", "wb") as file:
     pickle.dump(exp_data, file)
