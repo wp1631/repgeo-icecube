@@ -125,10 +125,10 @@ exp_data = {
     "rec_resp": recovered_resp_list,
     "base_neural_resp": neural_response,
     "noise": noise_list,
-    "predict_measure_data": predict_measurement_list
+    "predict_measure_data": predict_measurement_list,
 }
 
 print("done")
 
-with open("temp/exp_data.pkl", "wb") as file:
+with open("data/exp_data.pkl", "wb") as file:
     pickle.dump(exp_data, file)
