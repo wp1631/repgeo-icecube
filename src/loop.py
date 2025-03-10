@@ -128,7 +128,5 @@ exp_data = {
     "predict_measure_data": predict_measurement_list,
 }
 
-print("done")
-
 with open("data/exp_data.pkl", "wb") as file:
     pickle.dump(exp_data, file)

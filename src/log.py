@@ -1,7 +1,6 @@
 import logging
 import colorama
 from colorama import Fore, Style
-from cv2 import log
 
 # Initialize colorama for Windows compatibility
 colorama.init(autoreset=True)

@@ -10,6 +10,5 @@ psi = 0  # phase
 kernel = cv2.getGaborKernel(
     kernel_size, sigma, np.deg2rad(theta), lambd, gamma, psi, ktype=cv2.CV_32F
 )
-print(kernel)
 sns.heatmap(kernel)
 plt.show()

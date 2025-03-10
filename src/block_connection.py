@@ -1,9 +1,5 @@
 from utils.block_matrix import generate_block
 import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
-from scipy.linalg import svd, norm
 from sklearn.manifold import MDS
 from plotly.express import scatter_3d
 
@@ -38,11 +34,3 @@ fig = scatter_3d(
     color=use_svd_vals,
 )
 fig.show()
-
-# plt.scatter(
-#     svd_vec_emb[: svd_vals.shape[0], 0],
-#     svd_vec_emb[: svd_vals.shape[0], 1],
-#     c=svd_vals[: svd_vals.shape[0]],
-# )
-# plt.colorbar()
-# plt.show()
