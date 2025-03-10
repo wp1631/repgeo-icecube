@@ -31,16 +31,14 @@ def _generate_row_block(
 ):
     if covariance is None:
         covariance = np.identity(n=size[0])
-    print("begin")
     l = cholesky(covariance)
-    print("cov")
     z = np.random.normal(loc=0, scale=1, size=size)
     if isinstance(mean, np.ndarray):
         assert mean.shape == (0, size[0])
-        return mean + (z.T @ l.T).T
+        return mean + l @ z
     elif isinstance(mean, (float, int)):
         mean = np.full(shape=(size[0], 1), fill_value=mean)
-        return mean + (z.T @ l.T).T
+        return mean + l @ z
     raise NotImplementedError()
 
 
