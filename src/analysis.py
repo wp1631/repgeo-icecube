@@ -1,12 +1,11 @@
 import pickle
 import numpy as np
-import pandas as sp
 from scipy.linalg import svdvals
 import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
 
-with open("./temp/exp_data.pkl", "rb") as file:
+with open("./data/exp_data.pkl", "rb") as file:
     exp_data = pickle.load(file)
 
 enc_svds = [svdvals(item) for item in exp_data["enc_mat"]]
