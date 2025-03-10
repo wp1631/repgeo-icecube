@@ -3,12 +3,13 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
-from scipy.linalg import svd
+from scipy.linalg import svd, norm
 from sklearn.manifold import MDS
+from plotly.express import scatter_3d
 
-MAX_BLOCK = 10
-ROW_NUM = 20
-COL_NUM = 5
+MAX_BLOCK = 5
+ROW_NUM = 200
+COL_NUM = 20
 MODE = "row"
 mat_block = []
 
@@ -23,17 +24,25 @@ for i in range(MAX_BLOCK):
 
 mat = np.block(mat_block)
 svd_data = svd(mat)
-svd_vec = svd_data[0]
-
-svd_vec /= np.sum(svd_vec, axis=1)
+svd_vec = svd_data[0]  # These vectors are already normalized
 emb = MDS(n_components=3)
-svd_vec_emb = emb.fit_transform(svd_vec)
-svd_vals = svd_data[1]
+svd_vals = svd_data[1] / np.sum(svd_data[1])
+svd_vec_emb = emb.fit_transform(svd_vec)[: svd_vals.shape[0]]
 
-plt.scatter(
-    svd_vec_emb[: svd_vals.shape[0], 0],
-    svd_vec_emb[: svd_vals.shape[0], 1],
-    c=svd_vals[: svd_vals.shape[0]],
+use_svd_vals = svd_vals[: np.min(svd_vals.shape)]
+
+fig = scatter_3d(
+    x=svd_vec_emb[:, 0],
+    y=svd_vec_emb[:, 1],
+    z=svd_vec_emb[:, 2],
+    color=use_svd_vals,
 )
-plt.colorbar()
-plt.show()
+fig.show()
+
+# plt.scatter(
+#     svd_vec_emb[: svd_vals.shape[0], 0],
+#     svd_vec_emb[: svd_vals.shape[0], 1],
+#     c=svd_vals[: svd_vals.shape[0]],
+# )
+# plt.colorbar()
+# plt.show()
