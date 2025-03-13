@@ -2,6 +2,7 @@ from utils.block_matrix import generate_block
 import numpy as np
 from sklearn.manifold import MDS
 from plotly.express import scatter_3d
+from scipy.linalg import svd
 
 MAX_BLOCK = 5
 ROW_NUM = 200
