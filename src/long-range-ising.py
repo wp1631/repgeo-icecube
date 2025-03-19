@@ -36,7 +36,7 @@ timestamp = datetime.now()
 hashed_ts = hashlib.md5(timestamp.isoformat().encode()).hexdigest()
 folder_name = hashed_ts
 base_folder = pathlib.Path(r"/Users/waragonp/Documents/GitHub/repgeo/data").joinpath(folder_name)
-data_folder = base_folder.joinpath("dat").
+data_folder = base_folder.joinpath("dat")
 data_folder.mkdir(parents=True,exist_ok=True)
 img_folder = base_folder.joinpath("img")
 img_folder.mkdir(parents=True,exist_ok=True)
