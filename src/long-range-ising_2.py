@@ -7,6 +7,60 @@ from datetime import datetime
 import hashlib
 import pathlib
 import json
+from typing import Sequence
+
+
+def intialize_spins(
+    size: Sequence[int],
+    seed: int,
+    vmin: float,
+    vmax: float,
+) -> np.ndarray:
+    np.random.seed(seed)
+    return np.random.uniform(vmin, vmax, size)
+
+
+def spatial_index_wrapper(ind: int, mod: int):
+    return ind % mod
+
+
+def generate_neighbor_indices(
+    center: np.ndarray, distances: np.array, dim_bounds: Sequence[int]
+) -> np.ndarray:
+    neighbor = np.full(shape=distances, fill_value=center, dtype=int)
+    neighbor_translator = np.indices(2 * distances + 1) - np.meshgrid(
+        *(np.full(shape=2 * d + 1, fill_value=d) for d in distances)
+    )
+    adjusted = neighbor + neighbor_translator
+    return
+
+
+def step(
+    spins: np.ndarray,
+    J: float,
+    interaction_weight_kernel_sigma: Sequence[float],
+    kernel_sizes: int,
+    spin_deviation_sigma: float,
+):
+    random_index = tuple(np.random.randint(dim_size + 1) for dim_size in spins.shape)
+    assert kernel_sizes % 2 != 0
+    n_bound = int(kernel_sizes // 2)
+    n_range = np.arange(-neighbors_bound, neighbors_bound + 1)
+    # neighbors = [(i + r1, j + r2) for (r1, r2) in product(use_range, use_range)]
+    neighbors = []
+    neighbors_mat = np.array(neighbors).reshape((ksize, ksize, -1))
+
+
+def metropolis_hastings(
+    spins: np.ndarray,
+    interaction_kernel_sizes: Sequence[float],
+    interaction_sigma: float,
+    prior_distribution: ...,
+    seed: int,
+) -> np.ndarray:
+
+    return
+
 
 # Parameters
 N = 500  # Grid size
