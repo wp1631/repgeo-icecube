@@ -1,11 +1,10 @@
-from cv2 import repeat
 import numpy as np
-from typing import Sequence
 from icecream import ic
+import seaborn as sns
 
 
 def generate_neighbor_indices(
-    center: np.ndarray, distances: np.array, dim_bounds: np.ndarray
+    center: np.ndarray, distances: np.ndarray, dim_bounds: np.ndarray
 ) -> np.ndarray:
     _c = np.tile(center.reshape(-1, *([1] * len(center))), reps=2 * distances + 1)
     ic(_c.shape)
@@ -32,24 +31,22 @@ def pick_neighbor(
 
 
 def test():
-    full_pic = np.tile(
-        [
-            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-            [9, 8, 7, 6, 5, 4, 3, 2, 1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
-        ],
-        reps=[20, 1],
-    ).astype(np.float128)
-    full_pic += 2 * np.random.random(size=full_pic.shape)
+    full_pic = np.fromfunction(
+        lambda x, y: np.cos(0.02 * (x + y) + 0.0002 * x**2 - 0.0004 * y**2),
+        shape=(8, 8),
+    )
+    ic(full_pic.shape)
+    # full_pic = np.asarray(Image.open(r"/home/waragonp/Documents/GitHub/repgeo-icecube/src/utils/test_img.jpeg").convert("L")).astype(np.float128).copy()
     import matplotlib.pyplot as plt
 
-    fig, axes = plt.subplots(ncols=2)
-    axes[0].imshow(full_pic, vmax=15)
+    fig, axes = plt.subplots(ncols=2, figsize=(18, 12))
+    sns.heatmap(full_pic, ax=axes[0], annot=True)
+
     center = np.array([7, 0])
-    full_pic[center] = 100
-    distances = np.array([4, 8])
+    distances = np.array([2, 2])
     picked = pick_neighbor(full_pic, center, distances)
     ic(picked.shape)
-    axes[1].imshow(picked, vmax=15)
+    sns.heatmap(picked, ax=axes[1], annot=True)
     plt.show()
 
 
