@@ -14,7 +14,7 @@ J = 1.0  # Interaction strength
 T = 0.005  # Temperature
 random_seed = np.random.randint(1000000)
 np.random.seed(random_seed)
-num_steps = int(1e7)  # Number of Metropolis stepus
+num_steps = int(1e6)  # Number of Metropolis stepus
 ksize = 17
 sigma = 5
 neighbors_bound = int(ksize // 2)
