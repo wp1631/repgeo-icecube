@@ -1,4 +1,4 @@
-from utils.block_matrix import generate_block
+from utils.generators.block_matrix import generate_block
 import numpy as np
 from sklearn.manifold import MDS
 from plotly.express import scatter_3d
@@ -8,6 +8,7 @@ MAX_BLOCK = 5
 ROW_NUM = 200
 COL_NUM = 20
 MODE = "row"
+
 mat_block = []
 
 for i in range(MAX_BLOCK):
@@ -34,4 +35,5 @@ fig = scatter_3d(
     z=svd_vec_emb[:, 2],
     color=use_svd_vals,
 )
+
 fig.show()

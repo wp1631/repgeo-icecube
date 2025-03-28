@@ -7,7 +7,7 @@ from typing import TypeAlias
 Numeric: TypeAlias = int | float
 
 
-def cropImagePixel(
+def crop_image(
     image: np.ndarray, loc: tuple[int, int], size: tuple[int, int]
 ) -> np.ndarray:
     """

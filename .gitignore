@@ -6,7 +6,7 @@ dist/
 wheels/
 data/
 *.egg-info
-
+test.py
 # Virtual environments
 .venv/
 temp/
