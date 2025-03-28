@@ -21,7 +21,6 @@ def _generate_col_block(
     elif isinstance(mean, (float, int)):
         mean = np.full(shape=(1, size[1]), fill_value=mean)
         return mean + z @ l
-    raise NotImplementedError()
 
 
 def _generate_row_block(
@@ -39,7 +38,6 @@ def _generate_row_block(
     elif isinstance(mean, (float, int)):
         mean = np.full(shape=(size[0], 1), fill_value=mean)
         return mean + l @ z
-    raise NotImplementedError()
 
 
 def generate_block(
