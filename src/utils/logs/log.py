@@ -35,8 +35,4 @@ def get_logger(name=__name__):
 
 
 if __name__ == "__main__":
-    logger = get_logger()
-    logger.info("info")
-    logger.warning("warning")
-    logger.error("error")
-    logger.critical("critical")
+    pass

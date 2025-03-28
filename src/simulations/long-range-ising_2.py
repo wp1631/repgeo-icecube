@@ -11,7 +11,8 @@ from utils.generate_neighbor import pick_neighbor
 from typing import Callable
 from functools import lru_cache
 
-IC_ENABLED = False
+IC_ENABLED = True
+ic.configureOutput(includeContext=True)
 
 
 def intialize_spins(
@@ -118,7 +119,7 @@ def main():
     T = 0.005  # Temperature
     random_seed = np.random.randint(1000000)
     np.random.seed(random_seed)
-    num_steps = int(1e6)  # Number of Metropolis stepus
+    num_steps = int(1e4)  # Number of Metropolis stepus
     ksize = 17
     sigma = 5
     spins = np.random.uniform(0, np.pi, (N, N))

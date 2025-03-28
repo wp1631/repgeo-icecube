@@ -11,7 +11,7 @@ def vonmises_to_gaussian_stdev(kappa):
     return (np.pi / 2) * np.sqrt(1 - i1(kappa) / i0(kappa))
 
 
-if __name__ == "__main__":
+def main():
     fig, axes = plt.subplots(nrows=1, ncols=2)
     ax = axes.flatten()
     kappa_range = np.logspace(-2, 2, 30)
@@ -40,3 +40,7 @@ if __name__ == "__main__":
     ax[1].legend()
     ax[1].set_title("Standard deviation ratio of gaussian and vonmises")
     plt.show()
+
+
+if __name__ == "__main__":
+    main()
