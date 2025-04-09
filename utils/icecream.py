@@ -1,4 +1,4 @@
 from icecream import ic
 
-IC_ENABLED = True
+IC_ENABLED = False
 ic.configureOutput(includeContext=True)

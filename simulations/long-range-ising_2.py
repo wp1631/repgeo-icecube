@@ -6,7 +6,7 @@ import pathlib
 import json
 from utils.generators.neurons import intialize_spins
 from utils.solvers.metropolis_hastling import metropolis_hastings
-from utils.icecream import ic
+from utils.icecream import ic, IC_ENABLED
 from utils.savers.images import save_img
 
 N = 500  # Grid size
@@ -14,7 +14,7 @@ J = 1.0  # Interaction strength
 T = 0.005  # Temperature
 random_seed = np.random.randint(1000000)
 np.random.seed(random_seed)
-num_steps = int(10_000)  # Number of Metropolis stepus
+num_steps = int(10_000_000)  # Number of Metropolis stepus
 ksize = 17
 sigma = 5
 spins = intialize_spins(size=(N, N), seed=random_seed, vmin=0, vmax=np.pi)
