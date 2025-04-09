@@ -14,7 +14,7 @@ J = 1.0  # Interaction strength
 T = 0.005  # Temperature
 random_seed = np.random.randint(1000000)
 np.random.seed(random_seed)
-num_steps = int(1e4)  # Number of Metropolis stepus
+num_steps = int(10_000)  # Number of Metropolis stepus
 ksize = 17
 sigma = 5
 spins = intialize_spins(size=(N, N), seed=random_seed, vmin=0, vmax=np.pi)
