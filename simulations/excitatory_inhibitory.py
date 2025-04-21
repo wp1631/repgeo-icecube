@@ -11,14 +11,17 @@ from utils.savers.parameters import save_params
 
 N = 500  # Grid size
 J = 1.0  # Interaction strength
-T = 0.005  # Temperature
-SAVE_EVERY = 100_000
+T = 0.1  # Temperature
+# SAVE_EVERY = 10_000_000
 random_seed = np.random.randint(1000000)
 np.random.seed(random_seed)
-num_steps = int(10_000_000)  # Number of Metropolis stepus
-ksize = 35
-sigma_pos = 7
-sigma_neg = 10
+num_steps = int(10_000_000_000)  # Number of Metropolis stepus
+SAVE_EVERY = num_steps // 1000
+ksize = 71
+# sigma_pos = 5
+# sigma_neg = 10
+sigma_pos = 5
+sigma_neg = 7
 orientation_dev_range = np.pi / 10
 
 PARAMETER_DICT = {
@@ -47,7 +50,7 @@ img_folder.mkdir(parents=True, exist_ok=True)
 
 
 def save_data(num):
-    if (num + 1) % 10000000 == 0:
+    if (num + 1) % SAVE_EVERY == 0:
         savefile_dat = data_folder.joinpath(
             f"N{N}_J{J}_T{T}_ITER{num}_KSIZE{ksize}_PSIGMA{sigma_pos}_NSIGMA{sigma_neg}_TS{datetime.now()}.npy"
         )
