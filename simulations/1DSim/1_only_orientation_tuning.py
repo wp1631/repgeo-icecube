@@ -1,16 +1,13 @@
-from operator import ne
 import numpy as np
-from numpy.ma import shape
-from scipy.spatial import distance_matrix
 from scipy.stats import vonmises
 from scipy.linalg import lstsq
 from scipy.stats import special_ortho_group
 import matplotlib.pyplot as plt
-from multiprocessing import Pool
 from icecream import ic
 from sklearn.manifold import MDS
 from scipy.spatial.distance import pdist, squareform
 from sklearn.decomposition import PCA
+import seaborn as sns
 
 # ============Define Parameters==============
 NR_NUM = 3000
@@ -21,7 +18,7 @@ NR_OT_LOC_MAX = 2 * np.pi
 NR_OT_KAPPA = 10000
 
 # Stimulus sample
-ST_NUM = 100
+ST_NUM = 1000
 ST_OR_MIN = 0  # Stimulus orientation
 ST_OR_MAX = 2 * np.pi
 
@@ -62,7 +59,9 @@ ax.scatter(
     response_transformed_3d[:, 1],
     response_transformed_3d[:, 2],
     c=stimulus_ori,
+    alpha=0.3,
 )
+
 ax.set_xlabel("Dimension 1")
 ax.set_ylabel("Dimension 2")
 ax.set_zlabel("Dimension 3")
@@ -74,6 +73,7 @@ neural_responses_sorted = neural_responses[np.argsort(stimulus_ori)]
 p_dist = pdist(neural_responses_sorted)
 dist_mat = squareform(p_dist)
 plt.imshow(dist_mat)
+plt.colorbar()
 plt.show()
 
 pca_embedding = PCA(n_components=3)
@@ -84,14 +84,30 @@ ax.scatter(
     pca_embedded[:, 0],
     pca_embedded[:, 1],
     pca_embedded[:, 2],
+    c=np.arange(NR_NUM),
+    alpha=0.3,
 )
-plt.title(
-    "PCA Population Embedding of Sparse Orientation Coding, Neural Response MDS (3D)"
-)
+plt.title("PCA Population Embedding of Sparse Orientation Coding, Neural Response (3D)")
 plt.show()
 
+population_embedding_mds = embedding.fit_transform(neural_responses_sorted.T)
+fig = plt.figure()
+ax = fig.add_subplot(111, projection="3d")
+ax.scatter(
+    population_embedding_mds[:, 0],
+    population_embedding_mds[:, 1],
+    population_embedding_mds[:, 2],
+    c=np.arange(NR_NUM),
+    alpha=0.3,
+)
+plt.title("MDS Population Embedding of Sparse Orientation Coding, Neural Response (3D)")
+plt.show()
 neural_identity_sorted = neural_responses.T[np.argsort(neuron_tuning_loc)]
 p_dist = pdist(neural_identity_sorted)
 dist_mat = squareform(p_dist)
 plt.imshow(dist_mat)
+plt.colorbar()
+plt.show()
+
+plt.hist(neuron_tuning_loc, bins=20)
 plt.show()
