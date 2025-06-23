@@ -1,3 +1,4 @@
+from operator import ne
 import numpy as np
 from numpy.ma import shape
 from scipy.spatial import distance_matrix
@@ -9,25 +10,27 @@ from multiprocessing import Pool
 from icecream import ic
 from sklearn.manifold import MDS
 from scipy.spatial.distance import pdist, squareform
+from sklearn.decomposition import PCA
 
 # ============Define Parameters==============
-NR_NUM = 10000
+NR_NUM = 3000
 
 # Neuron Orientation Tuning
 NR_OT_LOC_MIN = 0  # Neuron minimum orientation tuning location
-NR_OT_LOC_MAX = np.pi
-NR_OT_KAPPA = 10
+NR_OT_LOC_MAX = 2 * np.pi
+NR_OT_KAPPA = 1000
 
 # Stimulus sample
-ST_NUM = 1000
+ST_NUM = 100
 ST_OR_MIN = 0  # Stimulus orientation
-ST_OR_MAX = np.pi
+ST_OR_MAX = 2 * np.pi
 
 # Channel paraneters
 CH_NUM = 6
 CH_OR_LOC_MIN = 0
-CH_OR_LOC_MAX = np.pi
+CH_OR_LOC_MAX = 2 * np.pi
 CH_OR_KAPPA = 5
+
 
 stimulus_ori = np.random.uniform(ST_OR_MIN, ST_OR_MAX, ST_NUM)
 neuron_tuning_loc = np.random.uniform(NR_OT_LOC_MIN, NR_OT_LOC_MAX, NR_NUM)
@@ -44,30 +47,51 @@ def _get_response(orientation_tuning_loc: float, orientation_tuning_kappa: float
     )
 
 
-if __name__ == "__main__":
-    with Pool() as p:
-        neural_responses = p.starmap(
-            _get_response, zip(neuron_tuning_loc, neuron_tuning_kappa)
-        )
-    neural_responses = np.array(neural_responses).T
-    ic(neural_responses.shape)
-    embedding = MDS(n_components=3, n_init=1)
-    response_transformed_3d = embedding.fit_transform(neural_responses)
-    fig = plt.figure()
-    ax = fig.add_subplot(111, projection="3d")
-    ax.scatter(
-        response_transformed_3d[:, 0],
-        response_transformed_3d[:, 1],
-        response_transformed_3d[:, 2],
-        c=stimulus_ori,
-    )
-    ax.set_xlabel("Dimension 1")
-    ax.set_ylabel("Dimension 2")
-    ax.set_zlabel("Dimension 3")
-    plt.title("MDS Embedding of Sparse Orientation Coding, Neural Response MDS (3D)")
-    plt.show()
+neural_responses = [
+    _get_response(x, y) for x, y in zip(neuron_tuning_loc, neuron_tuning_kappa)
+]
 
-    p_dist = pdist(neural_responses)
-    dist_mat = squareform(p_dist)
-    plt.imshow(dist_mat)
-    plt.show()
+neural_responses = np.array(neural_responses).T
+ic(neural_responses.shape)
+embedding = MDS(n_components=3, n_init=1)
+response_transformed_3d = embedding.fit_transform(neural_responses)
+fig = plt.figure()
+ax = fig.add_subplot(111, projection="3d")
+ax.scatter(
+    response_transformed_3d[:, 0],
+    response_transformed_3d[:, 1],
+    response_transformed_3d[:, 2],
+    c=stimulus_ori,
+)
+ax.set_xlabel("Dimension 1")
+ax.set_ylabel("Dimension 2")
+ax.set_zlabel("Dimension 3")
+plt.title("MDS Embedding of Sparse Orientation Coding, Neural Response MDS (3D)")
+plt.show()
+
+neural_responses_sorted = neural_responses[np.argsort(stimulus_ori)]
+
+p_dist = pdist(neural_responses_sorted)
+dist_mat = squareform(p_dist)
+plt.imshow(dist_mat)
+plt.show()
+
+pca_embedding = PCA(n_components=3)
+pca_embedded = pca_embedding.fit_transform(neural_responses_sorted.T)
+fig = plt.figure()
+ax = fig.add_subplot(111, projection="3d")
+ax.scatter(
+    pca_embedded[:, 0],
+    pca_embedded[:, 1],
+    pca_embedded[:, 2],
+)
+plt.title(
+    "PCA Population Embedding of Sparse Orientation Coding, Neural Response MDS (3D)"
+)
+plt.show()
+
+neural_identity_sorted = neural_responses.T[np.argsort(neuron_tuning_loc)]
+p_dist = pdist(neural_identity_sorted)
+dist_mat = squareform(p_dist)
+plt.imshow(dist_mat)
+plt.show()
