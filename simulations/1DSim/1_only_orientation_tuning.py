@@ -18,7 +18,7 @@ NR_NUM = 3000
 # Neuron Orientation Tuning
 NR_OT_LOC_MIN = 0  # Neuron minimum orientation tuning location
 NR_OT_LOC_MAX = 2 * np.pi
-NR_OT_KAPPA = 1000
+NR_OT_KAPPA = 10000
 
 # Stimulus sample
 ST_NUM = 100
