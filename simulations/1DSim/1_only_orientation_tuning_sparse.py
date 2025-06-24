@@ -60,6 +60,7 @@ ax.scatter(
     response_transformed_3d[:, 2],
     c=stimulus_ori,
     alpha=0.3,
+    cmap="hsv",
 )
 
 ax.set_xlabel("Dimension 1")
@@ -86,6 +87,7 @@ ax.scatter(
     pca_embedded[:, 2],
     c=np.arange(NR_NUM),
     alpha=0.3,
+    cmap="hsv",
 )
 plt.title("PCA Population Embedding of Sparse Orientation Coding, Neural Response (3D)")
 plt.show()
