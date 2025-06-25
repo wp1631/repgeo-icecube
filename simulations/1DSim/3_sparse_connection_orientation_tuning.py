@@ -1,3 +1,4 @@
+from os import wait
 import numpy as np
 from scipy.stats import vonmises
 from scipy.linalg import lstsq
@@ -73,9 +74,21 @@ neural_responses_sorted = neural_responses[np.argsort(stimulus_ori)]
 
 p_dist = pdist(neural_responses_sorted)
 dist_mat = squareform(p_dist)
+
 plt.imshow(dist_mat)
 plt.colorbar()
 plt.show()
+
+decile_dist = np.percentile(dist_mat, 10)
+conn_mat = dist_mat < decile_dist
+_ = conn_mat.copy()
+for i in range(10):
+    plt.imshow(_)
+    if i == 9:
+        continue
+    _ = conn_mat @ _
+    plt.colorbar()
+    plt.show()
 
 pca_embedding = PCA(n_components=3)
 pca_embedded = pca_embedding.fit_transform(neural_responses_sorted.T)
@@ -104,10 +117,12 @@ ax.scatter(
 )
 plt.title("MDS Population Embedding of Sparse Orientation Coding, Neural Response (3D)")
 plt.show()
+
 neural_identity_sorted = neural_responses.T[np.argsort(neuron_tuning_loc)]
 p_dist = pdist(neural_identity_sorted)
 dist_mat = squareform(p_dist)
-plt.imshow(dist_mat)
+med_dist = np.median(dist_mat) / 2
+plt.imshow(dist_mat < med_dist)
 plt.colorbar()
 plt.show()
 
