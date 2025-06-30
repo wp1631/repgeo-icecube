@@ -24,6 +24,10 @@ responses_arr = jnp.array(responses).T + noise_amp * np.random.random(
 )
 
 mean_responses = responses_arr.mean(axis=1)
+
+plt.hist(jnp.pi + empirical_tuning_location)
+plt.show()
+
 fig, axes = plt.subplots(ncols=2, sharey=True)
 axes[0].scatter(probe_stimulus_value, mean_responses, alpha=0.05)
 axes[0].set_title("Average population responses")
