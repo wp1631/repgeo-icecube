@@ -1,7 +1,7 @@
 import numpy as np
-from scipy.stats import vonmises
 from scipy.linalg import lstsq
-from scipy.stats import special_ortho_group
+from scipy.stats import special_ortho_group, vonmises
+from scipy.special import i0
 import matplotlib.pyplot as plt
 from icecream import ic
 from sklearn.manifold import MDS
@@ -51,6 +51,36 @@ neuron_arr = NeuronArray1D(
     neuron_recf_width,
 )
 
+
+def get_max_vonmises(kappa: float):
+    return np.exp(kappa) / (2 * np.pi * i0(kappa))
+
+
+# plot neural tuning profile
+def plot_neural_orientation_tuning_profile():
+    fig, ax = plt.subplots(dpi=200)
+    probe_stim = np.sort(stimulus.orientation)
+    for tuning_loc, tuning_kappa, tuning_amp in zip(
+        neuron_tuning_loc[::300], neuron_tuning_kappa[::300], neuron_tuning_amp[::300]
+    ):
+        ax.plot(
+            probe_stim,
+            tuning_amp * vonmises.pdf(probe_stim, loc=tuning_loc, kappa=tuning_kappa),
+            alpha=0.3,
+        )
+    plt.title("Neural Tuning Function")
+    plt.xlabel("Orientation")
+    plt.xticks(
+        [-np.pi, -np.pi / 2, 0, np.pi / 2, np.pi],
+        ["$-\pi /2$", "$-\pi /4$", "0", "$\pi/4$", "$\pi/2$"],
+    )
+    plt.ylim(0, np.max(get_max_vonmises(np.max(neuron_tuning_kappa[::300])) * 1.1))
+    plt.show()
+
+
+plot_neural_orientation_tuning_profile()
+
+# get neural responses
 neural_responses = neuron_arr.get_responses(stimulus)
 neural_responses = np.array(neural_responses).T
 
@@ -58,14 +88,21 @@ deriv = neuron_arr.get_derivatives(stimulus)
 deriv_normed = np.linalg.norm(deriv, axis=1)
 fisher_info = deriv_normed / np.sqrt(NR_NUM)
 
-plt.scatter(stimulus.orientation, fisher_info)
-plt.title("Fisher Information")
-plt.xlabel("Orientation")
-plt.xticks(
-    [-np.pi, -np.pi / 2, 0, np.pi / 2, np.pi],
-    ["$-\pi /2$", "$-\pi /4$", "0", "$\pi/4$", "$\pi/2$"],
-)
-plt.show()
+
+def plot_fisher_information():
+    plt.scatter(stimulus.orientation, fisher_info)
+    plt.title("Fisher Information $J( \\theta )$")
+    plt.xlabel("Orientation")
+    plt.xticks(
+        [-np.pi, -np.pi / 2, 0, np.pi / 2, np.pi],
+        ["$-\pi /2$", "$-\pi /4$", "0", "$\pi/4$", "$\pi/2$"],
+    )
+    plt.ylim(0, np.max(fisher_info * 1.4))
+    plt.show()
+
+
+plot_fisher_information()
+#
 
 embedding = MDS(n_components=3, n_init=1)
 response_transformed_3d = embedding.fit_transform(neural_responses)
