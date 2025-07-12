@@ -25,7 +25,7 @@ responses_arr = jnp.array(responses).T + noise_amp * np.random.random(
 
 mean_responses = responses_arr.mean(axis=1)
 
-plt.hist(jnp.pi + empirical_tuning_location)
+plt.hist(empirical_tuning_location % (2 * jnp.pi), bins=20)
 plt.show()
 
 fig, axes = plt.subplots(ncols=2, sharey=True)
@@ -41,20 +41,4 @@ axes[1].set_title("Channel responses over stimulus")
 fig.suptitle(
     "Average population signal strength Vs Channel responses  over stimulus orientation"
 )
-plt.show()
-
-
-embedding = MDS(n_components=3)
-population_embedding_mds = embedding.fit_transform(responses_arr)
-fig = plt.figure()
-ax = fig.add_subplot(111, projection="3d")
-ax.scatter(
-    population_embedding_mds[:, 0],
-    population_embedding_mds[:, 1],
-    population_embedding_mds[:, 2],
-    c=jnp.arange(probe_num),
-    alpha=0.3,
-    cmap="hsv",
-)
-plt.title("MDS Population Embedding of Neural Response (3D)")
 plt.show()
