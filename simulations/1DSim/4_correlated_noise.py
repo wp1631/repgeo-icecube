@@ -6,7 +6,6 @@ import matplotlib.pyplot as plt
 from icecream import ic
 from sklearn.manifold import MDS
 from scipy.spatial.distance import pdist, squareform
-from sklearn.decomposition import PCA
 from utils.generators.classes_1D import NeuronArray1D, Stimulus1D
 
 # ============Define Parameters==============
@@ -16,7 +15,7 @@ NR_NUM = 3000
 NR_OT_LOC_MIN = 0  # Neuron minimum orientation tuning location
 NR_OT_LOC_MAX = 2 * np.pi
 NR_OT_KAPPA = 1
-NR_LOC_W = 100
+NR_LOC_W = 20
 
 # Stimulus sample
 ST_NUM = 1000
@@ -31,6 +30,7 @@ CH_OR_LOC_MIN = 0
 CH_OR_LOC_MAX = 2 * np.pi
 CH_OR_KAPPA = 5
 
+# initialize the neuron values
 stimulus_ori = np.random.uniform(ST_OR_MIN, ST_OR_MAX, ST_NUM)
 stimulus_loc = np.random.uniform(ST_LOC_MIN, ST_LOC_MAX, ST_NUM)
 neuron_tuning_loc = np.random.uniform(NR_OT_LOC_MIN, NR_OT_LOC_MAX, NR_NUM)
@@ -51,6 +51,13 @@ neuron_arr = NeuronArray1D(
 
 neural_responses = neuron_arr.get_responses(stimulus)
 neural_responses = np.array(neural_responses).T
+
+deriv = neuron_arr.get_derivatives(stimulus)
+deriv_normed = np.linalg.norm(deriv, axis=1)
+
+plt.scatter(stimulus.orientation, deriv_normed / (5 * np.max(deriv_normed)))
+plt.hist(neuron_tuning_loc, bins=40, density=True)
+plt.show()
 
 embedding = MDS(n_components=3, n_init=1)
 response_transformed_3d = embedding.fit_transform(neural_responses)

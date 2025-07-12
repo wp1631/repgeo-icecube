@@ -94,3 +94,16 @@ class NeuronArray1D:
             self.get_response_amplitude(stimulus)
             * self.get_response_orientation(stimulus)
         ).T
+
+    def _get_res_deriv(self, stimulus: Stimulus1D):
+        return np.array(
+            [
+                y
+                * np.cos(stimulus.orientation - x)
+                * vonmises.pdf(stimulus.orientation, loc=x, kappa=y)
+                for x, y in zip(self._neural_tuning_loc, self._neural_tuning_kappa)
+            ]
+        ).T
+
+    def get_derivatives(self, stimulus: Stimulus1D) -> np.ndarray:
+        return self.get_response_amplitude(stimulus) * self._get_res_deriv(stimulus)
