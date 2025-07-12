@@ -12,15 +12,15 @@ from utils.generators.classes_1D import NeuronArray1D, Stimulus1D
 NR_NUM = 3000
 
 # Neuron Orientation Tuning
-NR_OT_LOC_MIN = 0  # Neuron minimum orientation tuning location
-NR_OT_LOC_MAX = 2 * np.pi
+NR_OT_LOC_MIN = -np.pi  # Neuron minimum orientation tuning location
+NR_OT_LOC_MAX = np.pi
 NR_OT_KAPPA = 1
-NR_LOC_W = 20
+NR_LOC_W = 100
 
 # Stimulus sample
 ST_NUM = 1000
-ST_OR_MIN = 0  # Stimulus orientation
-ST_OR_MAX = 2 * np.pi
+ST_OR_MIN = -np.pi  # Stimulus orientation
+ST_OR_MAX = np.pi
 ST_LOC_MIN = -3
 ST_LOC_MAX = 3
 
@@ -33,7 +33,9 @@ CH_OR_KAPPA = 5
 # initialize the neuron values
 stimulus_ori = np.random.uniform(ST_OR_MIN, ST_OR_MAX, ST_NUM)
 stimulus_loc = np.random.uniform(ST_LOC_MIN, ST_LOC_MAX, ST_NUM)
-neuron_tuning_loc = np.random.uniform(NR_OT_LOC_MIN, NR_OT_LOC_MAX, NR_NUM)
+
+neuron_tuning_loc = np.linspace(NR_OT_LOC_MIN, NR_OT_LOC_MAX, NR_NUM)
+# neuron_tuning_loc = np.random.uniform(NR_OT_LOC_MIN, NR_OT_LOC_MAX, NR_NUM)
 neuron_tuning_kappa = np.full(NR_NUM, NR_OT_KAPPA)
 neuron_tuning_amp = np.full(NR_NUM, 1)
 neuron_recf_loc = np.random.uniform(ST_LOC_MIN, ST_LOC_MAX, NR_NUM)
@@ -54,9 +56,15 @@ neural_responses = np.array(neural_responses).T
 
 deriv = neuron_arr.get_derivatives(stimulus)
 deriv_normed = np.linalg.norm(deriv, axis=1)
+fisher_info = deriv_normed / np.sqrt(NR_NUM)
 
-plt.scatter(stimulus.orientation, deriv_normed / (5 * np.max(deriv_normed)))
-plt.hist(neuron_tuning_loc, bins=40, density=True)
+plt.scatter(stimulus.orientation, fisher_info)
+plt.title("Fisher Information")
+plt.xlabel("Orientation")
+plt.xticks(
+    [-np.pi, -np.pi / 2, 0, np.pi / 2, np.pi],
+    ["$-\pi /2$", "$-\pi /4$", "0", "$\pi/4$", "$\pi/2$"],
+)
 plt.show()
 
 embedding = MDS(n_components=3, n_init=1)
