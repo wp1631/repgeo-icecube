@@ -32,6 +32,9 @@ CH_OR_LOC_MIN = 0
 CH_OR_LOC_MAX = 2 * np.pi
 CH_OR_KAPPA = 5
 
+
+# ============Data Generation==============
+
 # initialize the neuron values
 stimulus_ori = np.random.uniform(ST_OR_MIN, ST_OR_MAX, ST_NUM)
 stimulus_loc = np.random.uniform(ST_LOC_MIN, ST_LOC_MAX, ST_NUM)
@@ -56,6 +59,9 @@ neuron_arr = NeuronArray1D(
 
 def get_max_vonmises(kappa: float):
     return np.exp(kappa) / (2 * np.pi * i0(kappa))
+
+
+# ============Visualization==============
 
 
 # plot neural tuning profile
@@ -122,6 +128,18 @@ neural_responses = np.array(neural_responses).T
 deriv = neuron_arr.get_derivatives(stimulus)
 deriv_normed = np.linalg.norm(deriv, axis=1)
 fisher_info = deriv_normed / np.sqrt(NR_NUM)
+
+
+def plot_orientation_activation(neural_responses, sort_index):
+    neural_responses_sorted = neural_responses[sort_index]
+    plt.imshow(neural_responses_sorted, cmap="binary")
+    plt.xlabel("neuron id")
+    plt.ylabel("stimulus")
+    plt.colorbar()
+    plt.show()
+
+
+plot_orientation_activation(neural_responses, np.argsort(stimulus.orientation))
 
 
 def plot_orientation_fisher_information(
@@ -205,13 +223,13 @@ plot_mds(deriv, title="MDS Embedding of the Gradient (3D)")
 sort_index = np.argsort(stimulus_ori)
 
 
-def plot_RDM(neural_responses: np.ndarray, sort_index: np.ndarray):
+def plot_RDM(neural_responses: np.ndarray, sort_index: np.ndarray, cmap="binary"):
     neural_responses_sorted = neural_responses[sort_index]
 
     p_dist = pdist(neural_responses_sorted)
     dist_mat = squareform(p_dist)
 
-    plt.imshow(dist_mat)
+    plt.imshow(dist_mat, cmap=cmap)
     plt.colorbar()
     plt.show()
 
@@ -243,3 +261,6 @@ def PCA_scree_plot(neural_responses, dim: int = 15):
 
 
 PCA_scree_plot(neural_responses)
+# ============Inverted Encoding Model==============
+
+# ================Covariate Noise==================
