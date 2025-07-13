@@ -8,6 +8,7 @@ from sklearn.manifold import MDS
 from scipy.spatial.distance import pdist, squareform
 from utils.generators.classes_1D import NeuronArray1D, Stimulus1D
 import matplotlib as mpl
+from sklearn.decomposition import PCA
 
 # ============Define Parameters==============
 NR_NUM = 3000
@@ -16,7 +17,7 @@ NR_NUM = 3000
 NR_OT_LOC_MIN = -np.pi  # Neuron minimum orientation tuning location
 NR_OT_LOC_MAX = np.pi
 NR_OT_KAPPA = 1
-NR_LOC_W = 0.03
+NR_LOC_W = 100
 
 # Stimulus sample
 ST_NUM = 1000
@@ -216,3 +217,29 @@ def plot_RDM(neural_responses: np.ndarray, sort_index: np.ndarray):
 
 
 plot_RDM(neural_responses, sort_index)
+
+
+def plot_representational_distance(
+    stimulus_value: np.ndarray, neural_responses: np.ndarray
+):
+    sort_index = np.argsort(stimulus_value)
+    neural_responses_sorted = neural_responses[sort_index]
+    stim_sorted = stimulus_value[sort_index]
+    stim_dist = pdist(stim_sorted.reshape(-1, 1))
+    rep_dist = pdist(neural_responses_sorted)
+    plt.scatter(stim_dist, rep_dist)
+    plt.show()
+
+
+plot_representational_distance(stimulus.orientation, neural_responses)
+
+
+def PCA_scree_plot(neural_responses, dim: int = 15):
+    pca = PCA()
+    pca.fit(neural_responses)
+    vars = pca.explained_variance_ratio_
+    plt.scatter(np.arange(dim) + 1, vars[:dim])
+    plt.show()
+
+
+PCA_scree_plot(neural_responses)
