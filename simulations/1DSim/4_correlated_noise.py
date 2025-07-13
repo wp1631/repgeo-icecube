@@ -7,6 +7,7 @@ from icecream import ic
 from sklearn.manifold import MDS
 from scipy.spatial.distance import pdist, squareform
 from utils.generators.classes_1D import NeuronArray1D, Stimulus1D
+import matplotlib as mpl
 
 # ============Define Parameters==============
 NR_NUM = 3000
@@ -57,16 +58,33 @@ def get_max_vonmises(kappa: float):
 
 
 # plot neural tuning profile
-def plot_neural_orientation_tuning_profile():
-    fig, ax = plt.subplots(dpi=200)
+def plot_neural_orientation_tuning_profile(
+    stimulus: Stimulus1D,
+    neuron_tuning_loc: np.ndarray,
+    neuron_tuning_kappa: np.ndarray,
+    neuron_tuning_amp: np.ndarray,
+    /,
+    dpi: int = 200,
+    plot_every: int = 300,
+    alpha: float = 0.3,
+    cmap: str = "viridis",
+):
+    fig, ax = plt.subplots(dpi=dpi)
     probe_stim = np.sort(stimulus.orientation)
-    for tuning_loc, tuning_kappa, tuning_amp in zip(
-        neuron_tuning_loc[::300], neuron_tuning_kappa[::300], neuron_tuning_amp[::300]
+    num_lines = 1 + len(neuron_tuning_loc) // plot_every
+    _cmap = mpl.colormaps[cmap]
+    _colors = _cmap(np.linspace(0, 1, num_lines))
+    for tuning_loc, tuning_kappa, tuning_amp, col in zip(
+        neuron_tuning_loc[::plot_every],
+        neuron_tuning_kappa[::plot_every],
+        neuron_tuning_amp[::plot_every],
+        _colors,
     ):
         ax.plot(
             probe_stim,
             tuning_amp * vonmises.pdf(probe_stim, loc=tuning_loc, kappa=tuning_kappa),
-            alpha=0.3,
+            alpha=alpha,
+            c=col,
         )
     plt.title("Neural Tuning Function")
     plt.xlabel("Orientation")
@@ -74,11 +92,15 @@ def plot_neural_orientation_tuning_profile():
         [-np.pi, -np.pi / 2, 0, np.pi / 2, np.pi],
         ["$-\pi /2$", "$-\pi /4$", "0", "$\pi/4$", "$\pi/2$"],
     )
-    plt.ylim(0, np.max(get_max_vonmises(np.max(neuron_tuning_kappa[::300])) * 1.1))
+    plt.ylim(
+        0, np.max(get_max_vonmises(np.max(neuron_tuning_kappa[::plot_every])) * 1.1)
+    )
     plt.show()
 
 
-plot_neural_orientation_tuning_profile()
+plot_neural_orientation_tuning_profile(
+    stimulus, neuron_tuning_loc, neuron_tuning_kappa, neuron_tuning_amp
+)
 
 # get neural responses
 neural_responses = neuron_arr.get_responses(stimulus)
