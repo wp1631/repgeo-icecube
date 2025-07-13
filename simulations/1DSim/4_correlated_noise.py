@@ -16,7 +16,7 @@ NR_NUM = 3000
 NR_OT_LOC_MIN = -np.pi  # Neuron minimum orientation tuning location
 NR_OT_LOC_MAX = np.pi
 NR_OT_KAPPA = 1
-NR_LOC_W = 100
+NR_LOC_W = 0.03
 
 # Stimulus sample
 ST_NUM = 1000
@@ -111,19 +111,19 @@ deriv_normed = np.linalg.norm(deriv, axis=1)
 fisher_info = deriv_normed / np.sqrt(NR_NUM)
 
 
-def plot_fisher_information():
-    plt.scatter(stimulus.orientation, fisher_info)
-    plt.title("Fisher Information $J( \\theta )$")
+def plot_orientation_fisher_information():
+    plt.scatter(stimulus.orientation, fisher_info, c=stimulus.spatial_loc)
+    plt.title("Fisher Information $J(\\theta)$")
     plt.xlabel("Orientation")
     plt.xticks(
         [-np.pi, -np.pi / 2, 0, np.pi / 2, np.pi],
         ["$-\pi /2$", "$-\pi /4$", "0", "$\pi/4$", "$\pi/2$"],
     )
-    plt.ylim(0, np.max(fisher_info * 1.4))
+    plt.ylim(0, np.max(fisher_info * 1.1))
     plt.show()
 
 
-plot_fisher_information()
+plot_orientation_fisher_information()
 #
 
 embedding = MDS(n_components=3, n_init=1)
