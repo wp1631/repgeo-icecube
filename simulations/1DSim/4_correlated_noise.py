@@ -136,13 +136,26 @@ deriv_normed = np.linalg.norm(deriv, axis=1)
 fisher_info = deriv_normed / np.sqrt(NR_NUM)
 
 
-def plot_orientation_activation(neural_responses, sort_index):
+def plot_orientation_activation(
+    neural_responses: np.ndarray,
+    sort_index: np.ndarray,
+    /,
+    cmap: str = "binary",
+    xlabel: str = "neuron_id",
+    ylabel: str = "stimulus",
+    title: str = "Neural Activation vs Stimulus",
+    ax: Optional[Axes] = None,
+):
+    _ax = ax
+    if not ax:
+        fig, _ax = plt.subplots()
     neural_responses_sorted = neural_responses[sort_index]
-    plt.imshow(neural_responses_sorted, cmap="binary")
-    plt.xlabel("neuron id")
-    plt.ylabel("stimulus")
-    plt.colorbar()
-    plt.show()
+    _ax.imshow(neural_responses_sorted, cmap=cmap)
+    _ax.set_xlabel(xlabel)
+    _ax.set_ylabel(ylabel)
+    _ax.set_title(title)
+    if not ax:
+        plt.show()
 
 
 plot_orientation_activation(neural_responses, np.argsort(stimulus.orientation))
@@ -151,23 +164,29 @@ plot_orientation_activation(neural_responses, np.argsort(stimulus.orientation))
 def plot_orientation_fisher_information(
     stimulus: Stimulus1D,
     fisher_info: np.ndarray,
+    /,
     colored_by_spatial_loc: bool = True,
     cmap: str = "inferno",
+    ax: Optional[Axes] = None,
 ):
+    _ax = ax
+    if not ax:
+        fig, _ax = plt.subplots()
     if colored_by_spatial_loc:
-        plt.scatter(
+        _ax.scatter(
             stimulus.orientation, fisher_info, c=stimulus.spatial_loc, cmap=cmap
         )
     else:
-        plt.scatter(stimulus.orientation, fisher_info)
-    plt.title("Fisher Information $J(\\theta)$")
-    plt.xlabel("Orientation")
-    plt.xticks(
+        _ax.scatter(stimulus.orientation, fisher_info)
+    _ax.set_title("Fisher Information $J(\\theta)$")
+    _ax.set_xlabel("Orientation")
+    _ax.set_.xticks(
         [-np.pi, -np.pi / 2, 0, np.pi / 2, np.pi],
         ["$-\pi /2$", "$-\pi /4$", "0", "$\pi/4$", "$\pi/2$"],
     )
-    plt.ylim(0, np.max(fisher_info * 1.1))
-    plt.show()
+    _ax.set_ylim(0, np.max(fisher_info * 1.1))
+    if not ax:
+        plt.show()
 
 
 plot_orientation_fisher_information(stimulus, fisher_info)
