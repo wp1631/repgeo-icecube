@@ -16,7 +16,7 @@ NR_NUM = 3000
 # Neuron Orientation Tuning
 NR_OT_LOC_MIN = -np.pi  # Neuron minimum orientation tuning location
 NR_OT_LOC_MAX = np.pi
-NR_OT_KAPPA = 1
+NR_OT_KAPPA = 10
 NR_LOC_W = 100
 
 # Stimulus sample
@@ -28,10 +28,12 @@ ST_LOC_MAX = 3
 
 # Channel paraneters
 CH_NUM = 6
-CH_OR_LOC_MIN = 0
-CH_OR_LOC_MAX = 2 * np.pi
-CH_OR_KAPPA = 5
-
+CH_OR_LOC_MIN = -np.pi
+CH_OR_LOC_MAX = np.pi
+CH_OR_KAPPA = 3
+CH_RECF_WIDTH = 100
+CH_RECF_MIN = -3
+CH_RECF_MAX = 3
 
 # ============Data Generation==============
 
@@ -261,6 +263,65 @@ def PCA_scree_plot(neural_responses, dim: int = 15):
 
 
 PCA_scree_plot(neural_responses)
+
+
+# ============Measurement Simulation===============
+
+MEASUREMENT_GRID_SIZE = 0.05
+
+
+def create_voxel_sampling(
+    neural_responses: np.ndarray,
+    neuron_loc: np.ndarray,
+    voxel_width: float = MEASUREMENT_GRID_SIZE,
+    min_loc: float = -3,
+    max_loc: float = 3,
+    statistic: str = "mean",
+):
+    stats_dict = {
+        "mean": np.mean,
+        "median": np.median,
+    }
+    stat_func = stats_dict.get(statistic, np.mean)
+    voxel_bounds = np.arange(min_loc, max_loc, voxel_width)
+    all_channel = []
+    for i in range(len(voxel_bounds)):
+        # get the index for bounded location
+        use_index = np.logical_and(
+            neuron_loc >= voxel_bounds[i], neuron_loc <= voxel_bounds[i] + voxel_width
+        )
+        voxel_responses = stat_func(neural_responses[:, use_index], axis=1).reshape(
+            -1, 1
+        )
+        all_channel.append(voxel_responses)
+    measurement = np.hstack(all_channel)
+    return measurement
+
+
+measurement = create_voxel_sampling(
+    neural_responses, neuron_recf_loc, MEASUREMENT_GRID_SIZE
+)
+
+plot_RDM(measurement, sort_index)
 # ============Inverted Encoding Model==============
 
+## Channel Responses
+channel_tuning_loc = np.linspace(CH_OR_LOC_MIN, CH_OR_LOC_MAX, CH_NUM)
+channel_tuning_kappa = np.full(CH_NUM, CH_OR_KAPPA)
+channel_tuning_amp = np.full(CH_NUM, 1)
+channel_recf_loc = np.random.uniform(CH_RECF_MIN, CH_RECF_MAX, CH_NUM)
+channel_recf_width = np.full(CH_NUM, CH_RECF_WIDTH)
+
+channel_arr = NeuronArray1D(
+    tuning_loc=channel_tuning_loc,
+    tuning_kappa=channel_tuning_kappa,
+    tuning_amplitude=channel_tuning_amp,
+    recf_loc=channel_recf_loc,
+    recf_width=channel_recf_width,
+)
+channel_activation = channel_arr.get_responses(stimulus=stimulus).T
+
+## Weighting Variable
+fit_res = lstsq(channel_activation, measurement)
+ic(fit_res[1])
 # ================Covariate Noise==================
