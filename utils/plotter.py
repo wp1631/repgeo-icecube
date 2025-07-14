@@ -203,6 +203,9 @@ def plot_representational_distance(
     /,
     c: Optional[np.ndarray] = None,
     alpha: float = 0.2,
+    xlabel: str = "feature distance",
+    ylabel: str = "representation distance",
+    title: str = "Representation distance vs. Feature distance",
     ax: Optional[Axes] = None,
 ):
     _ax = ax
@@ -216,7 +219,10 @@ def plot_representational_distance(
     stim_dist = pdist(stim_sorted.reshape(-1, 1))
     rep_dist = pdist(neural_responses_sorted)
     _ax.scatter(stim_dist, rep_dist, alpha=alpha, c=c)
-    if not _ax:
+    _ax.set_xlabel(xlabel)
+    _ax.set_ylabel(ylabel)
+    _ax.set_title(title)
+    if not ax:
         plt.show()
 
 

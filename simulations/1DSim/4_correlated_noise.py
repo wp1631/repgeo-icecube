@@ -22,7 +22,7 @@ NR_NUM = 3000
 NR_OT_LOC_MIN = -np.pi  # Neuron minimum orientation tuning location
 NR_OT_LOC_MAX = np.pi
 NR_OT_KAPPA = 10
-NR_LOC_W = 100
+NR_LOC_W = 0.03
 
 # Stimulus sample
 ST_NUM = 1000
@@ -152,8 +152,16 @@ inv_weight = np.linalg.pinv(mapping_weight)
 ## Test the reconstruction
 reconstructed_channal_responses = measurement @ inv_weight
 
-plot_mds(reconstructed_channal_responses, title="Reconstructed Channel Responses")
+plot_mds(
+    reconstructed_channal_responses,
+    c=stimulus.orientation,
+    title="Reconstructed Channel Responses",
+)
 
-plot_representational_distance(stimulus.orientation, reconstructed_channal_responses)
+plot_representational_distance(
+    stimulus.orientation,
+    reconstructed_channal_responses,
+    title="Reconstructed Representation Distance vs. Feature Distance",
+)
 
 # ================Covariate Noise==================
