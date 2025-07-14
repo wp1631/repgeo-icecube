@@ -1,17 +1,19 @@
-from typing import Optional
 import numpy as np
 from scipy.linalg import lstsq
 from scipy.stats import special_ortho_group, vonmises
 from scipy.special import i0
-import matplotlib.pyplot as plt
 from icecream import ic
-from sklearn.manifold import MDS
-from scipy.spatial.distance import pdist, squareform
 from utils.generators.classes_1D import NeuronArray1D, Stimulus1D
-import matplotlib as mpl
-from matplotlib.axes import Axes
-from mpl_toolkits.mplot3d import Axes3D
 from sklearn.decomposition import PCA
+from utils.plotter import (
+    plot_orientation_fisher_information,
+    plot_mds,
+    plot_RDM,
+    plot_orientation_activation,
+    plot_representational_distance,
+    plot_neural_orientation_tuning_profile,
+    plot_pca_scree,
+)
 
 # ============Define Parameters==============
 NR_NUM = 3000
@@ -62,68 +64,8 @@ neuron_arr = NeuronArray1D(
 )
 
 
-def get_max_vonmises(kappa: float):
-    return np.exp(kappa) / (2 * np.pi * i0(kappa))
-
-
 # ============Visualization==============
-
-
 # plot neural tuning profile
-def plot_neural_orientation_tuning_profile(
-    stimulus: Stimulus1D,
-    neuron_tuning_loc: np.ndarray,
-    neuron_tuning_kappa: np.ndarray,
-    neuron_tuning_amp: np.ndarray,
-    /,
-    dpi: int = 200,
-    plot_every: int = 300,
-    alpha: float = 0.2,
-    cmap: str = "viridis",
-    ax: Optional[Axes] = None,
-):
-    if not ax:
-        fig, ax = plt.subplots(dpi=dpi)
-    probe_stim = np.sort(stimulus.orientation)
-    num_lines = 1 + len(neuron_tuning_loc) // plot_every
-    _center = num_lines // 2
-    _cmap = mpl.colormaps[cmap]
-    _colors = _cmap(np.linspace(0, 1, num_lines))
-    for tuning_loc, tuning_kappa, tuning_amp, col in zip(
-        neuron_tuning_loc[::plot_every],
-        neuron_tuning_kappa[::plot_every],
-        neuron_tuning_amp[::plot_every],
-        _colors,
-    ):
-        ax.plot(
-            probe_stim,
-            tuning_amp * vonmises.pdf(probe_stim, loc=tuning_loc, kappa=tuning_kappa),
-            alpha=alpha,
-            c=col,
-        )
-    ax.plot(
-        probe_stim,
-        neuron_tuning_amp[_center * plot_every]
-        * vonmises.pdf(
-            probe_stim,
-            loc=neuron_tuning_loc[_center * plot_every],
-            kappa=neuron_tuning_kappa[_center * plot_every],
-        ),
-        alpha=1,
-        c=_colors[_center],
-    )
-    plt.title("Neural Tuning Function")
-    plt.xlabel("Orientation")
-    plt.xticks(
-        [-np.pi, -np.pi / 2, 0, np.pi / 2, np.pi],
-        ["$-\pi /2$", "$-\pi /4$", "0", "$\pi/4$", "$\pi/2$"],
-    )
-    plt.ylim(
-        0, np.max(get_max_vonmises(np.max(neuron_tuning_kappa[::plot_every])) * 1.1)
-    )
-    plt.show()
-
-
 plot_neural_orientation_tuning_profile(
     stimulus, neuron_tuning_loc, neuron_tuning_kappa, neuron_tuning_amp
 )
@@ -136,196 +78,24 @@ deriv = neuron_arr.get_derivatives(stimulus)
 deriv_normed = np.linalg.norm(deriv, axis=1)
 fisher_info = deriv_normed / np.sqrt(NR_NUM)
 
-
-def plot_orientation_activation(
-    neural_responses: np.ndarray,
-    sort_index: np.ndarray,
-    /,
-    cmap: str = "binary",
-    xlabel: str = "neuron_id",
-    ylabel: str = "stimulus",
-    title: str = "Neural Activation vs Stimulus",
-    ax: Optional[Axes] = None,
-):
-    _ax = ax
-    if not ax:
-        fig, _ax = plt.subplots()
-    neural_responses_sorted = neural_responses[sort_index]
-    _ax.imshow(neural_responses_sorted, cmap=cmap)
-    _ax.set_xlabel(xlabel)
-    _ax.set_ylabel(ylabel)
-    _ax.set_title(title)
-    if not ax:
-        plt.show()
-
-
 plot_orientation_activation(neural_responses, np.argsort(stimulus.orientation))
-
-
-def plot_orientation_fisher_information(
-    stimulus: Stimulus1D,
-    fisher_info: np.ndarray,
-    /,
-    colored_by_spatial_loc: bool = True,
-    cmap: str = "inferno",
-    ax: Optional[Axes] = None,
-):
-    _ax = ax
-    if not ax:
-        fig, _ax = plt.subplots()
-    if colored_by_spatial_loc:
-        _ax.scatter(
-            stimulus.orientation, fisher_info, c=stimulus.spatial_loc, cmap=cmap
-        )
-    else:
-        _ax.scatter(stimulus.orientation, fisher_info)
-    _ax.set_title("Fisher Information $J(\\theta)$")
-    _ax.set_xlabel("Orientation")
-    _ax.set_xticks(
-        [-np.pi, -np.pi / 2, 0, np.pi / 2, np.pi],
-        ["$-\pi /2$", "$-\pi /4$", "0", "$\pi/4$", "$\pi/2$"],
-    )
-    _ax.set_ylim(0, np.max(fisher_info * 1.1))
-    if not ax:
-        plt.show()
-
 
 plot_orientation_fisher_information(stimulus, fisher_info)
 
-
-def plot_mds(
-    data: np.ndarray,
-    dim: int = 3,
-    alpha: float = 0.3,
-    cmap: str = "hsv",
-    /,
-    xlabel: str = "Dimension 1",
-    ylabel: str = "Dimension 2",
-    zlabel: str = "Dimension 3",
-    title: str = "MDS Embedding of the neural responses (3D)",
-    ax: Optional[Axes | Axes3D] = None,
-):
-    _ax = ax
-    if not ax:
-        fig = plt.figure()
-        _ax = fig.add_subplot(111, projection="3d")
-    embedding = MDS(n_components=dim)
-    _transformed_3d = embedding.fit_transform(data)
-    if dim == 2:
-        _ax.scatter(
-            _transformed_3d[:, 0],
-            _transformed_3d[:, 1],
-            c=stimulus_ori,
-            alpha=alpha,
-            cmap=cmap,
-        )
-    if dim == 3:
-        if not isinstance(_ax, Axes3D):
-            raise ValueError(
-                "Incongruent dimension of the plot and matplotlib ax projection"
-            )
-        _ax.scatter(
-            _transformed_3d[:, 0],
-            _transformed_3d[:, 1],
-            _transformed_3d[:, 2],
-            c=stimulus_ori,
-            alpha=alpha,
-            cmap=cmap,
-        )
-    else:
-        raise NotImplementedError(
-            "Dimension for plot is not correct; need to be 2 or 3"
-        )
-
-    _ax.set_xlabel(xlabel)
-    _ax.set_ylabel(ylabel)
-    if dim == 3:
-        _ax.set_zlabel(zlabel)
-    _ax.set_title(title)
-    if not ax:
-        plt.show()
-
-
 # Plot MDS of the neural responses
-plot_mds(neural_responses)
+plot_mds(neural_responses, c=stimulus.orientation)
 
 # Plot MDS of the orientation gradient
-plot_mds(deriv, title="MDS Embedding of the Gradient (3D)")
+plot_mds(deriv, c=stimulus.orientation, title="MDS Embedding of the Gradient (3D)")
 
 # Plot MDS of the location gradient
 sort_index = np.argsort(stimulus_ori)
 
-
-def plot_RDM(
-    neural_responses: np.ndarray,
-    sort_index: np.ndarray,
-    /,
-    cmap: str = "binary",
-    ax: Optional[Axes] = None,
-):
-    _ax = ax
-    if not ax:
-        fig, _ax = plt.subplots()
-    neural_responses_sorted = neural_responses[sort_index]
-
-    p_dist = pdist(neural_responses_sorted)
-    dist_mat = squareform(p_dist)
-
-    _ax.imshow(dist_mat, cmap=cmap)
-    if not ax:
-        plt.show()
-
-
 plot_RDM(neural_responses, sort_index)
-
-
-def plot_representational_distance(
-    stimulus_value: np.ndarray,
-    neural_responses: np.ndarray,
-    /,
-    c: Optional[np.ndarray] = None,
-    alpha: float = 0.2,
-    ax: Optional[Axes] = None,
-):
-    _ax = ax
-    if not _ax:
-        fig, _ax = plt.subplots()
-    if c:
-        assert len(c) == len(stimulus_value)
-    sort_index = np.argsort(stimulus_value)
-    neural_responses_sorted = neural_responses[sort_index]
-    stim_sorted = stimulus_value[sort_index]
-    stim_dist = pdist(stim_sorted.reshape(-1, 1))
-    rep_dist = pdist(neural_responses_sorted)
-    _ax.scatter(stim_dist, rep_dist, alpha=alpha, c=c)
-    if not _ax:
-        plt.show()
-
 
 plot_representational_distance(stimulus.orientation, neural_responses)
 
-
-def PCA_scree_plot(
-    neural_responses: np.ndarray,
-    dim: int = 15,
-    /,
-    ax: Optional[Axes] = None,
-    title: str = "Scree Plot",
-):
-    _ax = ax
-    if not _ax:
-        fig, _ax = plt.subplots()
-
-    pca = PCA()
-    pca.fit(neural_responses)
-    var = pca.explained_variance_ratio_
-    _ax.scatter(np.arange(dim) + 1, var[:dim])
-    _ax.set_title(title)
-    if not _ax:
-        plt.show()
-
-
-PCA_scree_plot(neural_responses)
+plot_pca_scree(neural_responses)
 
 
 # ============Measurement Simulation===============
