@@ -321,7 +321,30 @@ channel_arr = NeuronArray1D(
 )
 channel_activation = channel_arr.get_responses(stimulus=stimulus).T
 
-## Weighting Variable
+## Get Weighting Variable
 fit_res = lstsq(channel_activation, measurement)
-ic(fit_res[1])
+mapping_weight = fit_res[0]
+residues = fit_res[1]
+ic(residues.shape)
+total_res = np.sum(residues)
+ic(total_res.shape)
+
+
+## Get total variance
+def get_total_variance(signals: np.ndarray):
+    pca = PCA()
+    pca.fit(signals)
+    return np.sum(pca.explained_variance_)
+
+
+total_var = get_total_variance(signals=channel_activation)
+ic(total_var.shape)
+var_ratio = total_var / total_res
+ic(var_ratio.shape)
+ic(var_ratio)
+
+inv_weight = np.linalg.pinv(mapping_weight)
+
+## Test the reconstruction
+
 # ================Covariate Noise==================
