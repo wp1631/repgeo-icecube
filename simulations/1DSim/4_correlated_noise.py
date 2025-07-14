@@ -241,7 +241,7 @@ def plot_mds(
     _ax.set_ylabel(ylabel)
     if dim == 3:
         _ax.set_zlabel(zlabel)
-    ax.set_title(title)
+    _ax.set_title(title)
     if not ax:
         plt.show()
 
@@ -252,8 +252,7 @@ plot_mds(neural_responses)
 # Plot MDS of the orientation gradient
 plot_mds(deriv, title="MDS Embedding of the Gradient (3D)")
 
-# TODO Plot MDS of the location gradient
-# plot_mds()
+# Plot MDS of the location gradient
 sort_index = np.argsort(stimulus_ori)
 
 
