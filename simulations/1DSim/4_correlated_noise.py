@@ -346,5 +346,6 @@ ic(var_ratio)
 inv_weight = np.linalg.pinv(mapping_weight)
 
 ## Test the reconstruction
-
+reconstructed_channal_responses = measurement @ inv_weight
+plot_mds(reconstructed_channal_responses, title="Reconstructed Cahnnel Responses")
 # ================Covariate Noise==================
