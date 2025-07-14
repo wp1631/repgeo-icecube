@@ -10,6 +10,7 @@ from scipy.spatial.distance import pdist, squareform
 from utils.generators.classes_1D import NeuronArray1D, Stimulus1D
 import matplotlib as mpl
 from matplotlib.axes import Axes
+from mpl_toolkits.mplot3d import Axes3D
 from sklearn.decomposition import PCA
 
 # ============Define Parameters==============
@@ -202,13 +203,16 @@ def plot_mds(
     ylabel: str = "Dimension 2",
     zlabel: str = "Dimension 3",
     title: str = "MDS Embedding of the neural responses (3D)",
+    ax: Optional[Axes | Axes3D] = None,
 ):
+    _ax = ax
+    if not ax:
+        fig = plt.figure()
+        _ax = fig.add_subplot(111, projection="3d")
     embedding = MDS(n_components=dim)
     _transformed_3d = embedding.fit_transform(data)
-    fig = plt.figure()
-    ax = fig.add_subplot(111, projection="3d")
     if dim == 2:
-        ax.scatter(
+        _ax.scatter(
             _transformed_3d[:, 0],
             _transformed_3d[:, 1],
             c=stimulus_ori,
@@ -216,7 +220,11 @@ def plot_mds(
             cmap=cmap,
         )
     if dim == 3:
-        ax.scatter(
+        if not isinstance(_ax, Axes3D):
+            raise ValueError(
+                "Incongruent dimension of the plot and matplotlib ax projection"
+            )
+        _ax.scatter(
             _transformed_3d[:, 0],
             _transformed_3d[:, 1],
             _transformed_3d[:, 2],
@@ -229,12 +237,13 @@ def plot_mds(
             "Dimension for plot is not correct; need to be 2 or 3"
         )
 
-    ax.set_xlabel(xlabel)
-    ax.set_ylabel(ylabel)
+    _ax.set_xlabel(xlabel)
+    _ax.set_ylabel(ylabel)
     if dim == 3:
-        ax.set_zlabel(zlabel)
-    plt.title(title)
-    plt.show()
+        _ax.set_zlabel(zlabel)
+    ax.set_title(title)
+    if not ax:
+        plt.show()
 
 
 # Plot MDS of the neural responses
@@ -248,41 +257,73 @@ plot_mds(deriv, title="MDS Embedding of the Gradient (3D)")
 sort_index = np.argsort(stimulus_ori)
 
 
-def plot_RDM(neural_responses: np.ndarray, sort_index: np.ndarray, cmap="binary"):
+def plot_RDM(
+    neural_responses: np.ndarray,
+    sort_index: np.ndarray,
+    /,
+    cmap: str = "binary",
+    ax: Optional[Axes] = None,
+):
+    _ax = ax
+    if not ax:
+        fig, _ax = plt.subplots()
     neural_responses_sorted = neural_responses[sort_index]
 
     p_dist = pdist(neural_responses_sorted)
     dist_mat = squareform(p_dist)
 
-    plt.imshow(dist_mat, cmap=cmap)
-    plt.colorbar()
-    plt.show()
+    _ax.imshow(dist_mat, cmap=cmap)
+    if not ax:
+        plt.show()
 
 
 plot_RDM(neural_responses, sort_index)
 
 
 def plot_representational_distance(
-    stimulus_value: np.ndarray, neural_responses: np.ndarray
+    stimulus_value: np.ndarray,
+    neural_responses: np.ndarray,
+    /,
+    c: Optional[np.ndarray] = None,
+    alpha: float = 0.2,
+    ax: Optional[Axes] = None,
 ):
+    _ax = ax
+    if not _ax:
+        fig, _ax = plt.subplots()
+    if c:
+        assert len(c) == len(stimulus_value)
     sort_index = np.argsort(stimulus_value)
     neural_responses_sorted = neural_responses[sort_index]
     stim_sorted = stimulus_value[sort_index]
     stim_dist = pdist(stim_sorted.reshape(-1, 1))
     rep_dist = pdist(neural_responses_sorted)
-    plt.scatter(stim_dist, rep_dist)
-    plt.show()
+    _ax.scatter(stim_dist, rep_dist, alpha=alpha, c=c)
+    if not _ax:
+        plt.show()
 
 
 plot_representational_distance(stimulus.orientation, neural_responses)
 
 
-def PCA_scree_plot(neural_responses, dim: int = 15):
+def PCA_scree_plot(
+    neural_responses: np.ndarray,
+    dim: int = 15,
+    /,
+    ax: Optional[Axes] = None,
+    title: str = "Scree Plot",
+):
+    _ax = ax
+    if not _ax:
+        fig, _ax = plt.subplots()
+
     pca = PCA()
     pca.fit(neural_responses)
-    vars = pca.explained_variance_ratio_
-    plt.scatter(np.arange(dim) + 1, vars[:dim])
-    plt.show()
+    var = pca.explained_variance_ratio_
+    _ax.scatter(np.arange(dim) + 1, var[:dim])
+    _ax.set_title(title)
+    if not _ax:
+        plt.show()
 
 
 PCA_scree_plot(neural_responses)
@@ -370,5 +411,9 @@ inv_weight = np.linalg.pinv(mapping_weight)
 
 ## Test the reconstruction
 reconstructed_channal_responses = measurement @ inv_weight
+
 plot_mds(reconstructed_channal_responses, title="Reconstructed Channel Responses")
+
+plot_representational_distance(stimulus.orientation, reconstructed_channal_responses)
+
 # ================Covariate Noise==================
