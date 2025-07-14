@@ -180,7 +180,7 @@ def plot_orientation_fisher_information(
         _ax.scatter(stimulus.orientation, fisher_info)
     _ax.set_title("Fisher Information $J(\\theta)$")
     _ax.set_xlabel("Orientation")
-    _ax.set_.xticks(
+    _ax.set_xticks(
         [-np.pi, -np.pi / 2, 0, np.pi / 2, np.pi],
         ["$-\pi /2$", "$-\pi /4$", "0", "$\pi/4$", "$\pi/2$"],
     )
