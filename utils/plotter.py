@@ -26,7 +26,7 @@ def plot_neural_orientation_tuning_profile(
     dpi: int = 200,
     plot_every: int = 300,
     alpha: float = 0.2,
-    cmap: str = "viridis",
+    cmap: str = "twilight",
     ax: Optional[Axes] = None,
 ):
     _ax = ax
