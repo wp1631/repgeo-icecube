@@ -1,3 +1,4 @@
+from typing import Optional
 import numpy as np
 from scipy.linalg import lstsq
 from scipy.stats import special_ortho_group, vonmises
@@ -8,6 +9,7 @@ from sklearn.manifold import MDS
 from scipy.spatial.distance import pdist, squareform
 from utils.generators.classes_1D import NeuronArray1D, Stimulus1D
 import matplotlib as mpl
+from matplotlib.axes import Axes
 from sklearn.decomposition import PCA
 
 # ============Define Parameters==============
@@ -77,8 +79,10 @@ def plot_neural_orientation_tuning_profile(
     plot_every: int = 300,
     alpha: float = 0.2,
     cmap: str = "viridis",
+    ax: Optional[Axes] = None,
 ):
-    fig, ax = plt.subplots(dpi=dpi)
+    if not ax:
+        fig, ax = plt.subplots(dpi=dpi)
     probe_stim = np.sort(stimulus.orientation)
     num_lines = 1 + len(neuron_tuning_loc) // plot_every
     _center = num_lines // 2
@@ -347,5 +351,5 @@ inv_weight = np.linalg.pinv(mapping_weight)
 
 ## Test the reconstruction
 reconstructed_channal_responses = measurement @ inv_weight
-plot_mds(reconstructed_channal_responses, title="Reconstructed Cahnnel Responses")
+plot_mds(reconstructed_channal_responses, title="Reconstructed Channel Responses")
 # ================Covariate Noise==================
