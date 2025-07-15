@@ -7,7 +7,6 @@ def create_block_noise(
     _noise = np.empty((observation, total_size))
     _n = total_size // block_size
     for i in range(_n):
-        print(i)
         _noise[:, block_size * i : block_size * (i + 1)] = np.random.normal(
             0, 1, (observation, 1)
         )
@@ -19,10 +18,3 @@ def create_block_noise(
         _noise[:, block_size * (_n) :] = np.random.normal((observation, 1))
         _noise[:, block_size * (_n) :] += minor_amp * np.random.normal((observation, l))
     return _noise
-
-
-if __name__ == "__main__":
-    import matplotlib.pyplot as plt
-
-    plt.plot(create_block_noise().T)
-    plt.show()

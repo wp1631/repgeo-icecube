@@ -1,8 +1,9 @@
+from os import wait
 import numpy as np
-from scipy.linalg import lstsq
-from scipy.stats import special_ortho_group, vonmises
 from icecream import ic
+from scipy.integrate._ivp.bdf import change_D
 from utils.generators.classes_1D import NeuronArray1D, Stimulus1D
+from utils.generators.noise import create_block_noise
 from sklearn.decomposition import PCA
 from utils.plotter import (
     plot_orientation_fisher_information,
@@ -198,19 +199,21 @@ plot_mds(
 )
 # ================Covariate Noise==================
 
+block_noise_response = neural_responses + create_block_noise(
+    block_size=200, total_size=NR_NUM, observation=ST_NUM
+)
+plot_mds(
+    block_noise_response,
+    c=stimulus.orientation,
+    title="Block Noise Neural Responses MDS (3D)",
+)
 
-def create_block_noise(
-    block_size=100, total_size=1500, observation: int = 1000, minor_amp: float = 0.1
-):
-    _noise = np.empty((observation, total_size))
-    for i in range(total_size // block_size):
-        _noise[:, block_size * i : block_size * (i + 1)] = np.random.normal(
-            (observation, 1)
-        )
-        _noise[
-            :, block_size * i : block_size * (i + 1)
-        ] += minor_amp * np.random.normal((observation, block_size))
-    l = _noise[:, block_size * (i + 1) :].shape[1]
-    _noise[:, block_size * (i + 1) :] = np.random.normal((observation, 1))
-    _noise[:, block_size * (i + 1) :] += minor_amp * np.random.normal((observation, l))
-    return _noise
+block_noise_iem = IEM1D(channel_arr)
+block_noise_iem.fit(stimulus, noisy_measurement)
+block_noisy_channel = block_noise_iem.decode(noisy_measurement)
+
+plot_mds(
+    block_noisy_channel,
+    c=stimulus.orientation,
+    title="Block Noise Reconstruction MDS (3D)",
+)
