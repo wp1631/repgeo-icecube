@@ -14,6 +14,7 @@ from utils.plotter import (
     plot_pca_scree,
 )
 from utils.statistical_sampling import create_voxel_sampling
+from utils.iem import IEM1D
 
 # ============Define Parameters==============
 NR_NUM = 3000
@@ -21,7 +22,7 @@ NR_NUM = 3000
 # Neuron Orientation Tuning
 NR_OT_LOC_MIN = -np.pi  # Neuron minimum orientation tuning location
 NR_OT_LOC_MAX = np.pi
-NR_OT_KAPPA = 10
+NR_OT_KAPPA = 5
 NR_LOC_W = 0.03
 
 # Stimulus sample
@@ -39,7 +40,6 @@ CH_OR_KAPPA = 3
 CH_RECF_WIDTH = 100
 CH_RECF_MIN = -3
 CH_RECF_MAX = 3
-
 # ============Data Generation==============
 
 # initialize the neuron values
@@ -125,13 +125,17 @@ channel_arr = NeuronArray1D(
 )
 channel_activation = channel_arr.get_responses(stimulus=stimulus).T
 
+iem_obj = IEM1D(channel_arr)
+iem_obj.fit(stimulus, measurement)
+
+
 ## Get Weighting Variable
-fit_res = lstsq(channel_activation, measurement)
-mapping_weight = fit_res[0]
-residues = fit_res[1]
+mapping_weight = iem_obj.encode_weight
+residues = iem_obj.encode_residues
 ic(residues.shape)
 total_res = np.sum(residues)
 ic(total_res.shape)
+inv_weight = iem_obj.decode_weight
 
 
 ## Get total variance
@@ -147,7 +151,6 @@ var_ratio = total_var / total_res
 ic(var_ratio.shape)
 ic(var_ratio)
 
-inv_weight = np.linalg.pinv(mapping_weight)
 
 ## Test the reconstruction
 reconstructed_channal_responses = measurement @ inv_weight
@@ -164,4 +167,50 @@ plot_representational_distance(
     title="Reconstructed Representation Distance vs. Feature Distance",
 )
 
+## Noisy Encoding
+
+NEURONAL_NOISE_AMPLITUDE = 0.005
+MEASUREMENT_NOISE_AMPLITUDE = 0.02
+
+base_signal_noise = np.random.normal(loc=0, scale=1, size=neural_responses.shape)
+noisy_responses = neural_responses + NEURONAL_NOISE_AMPLITUDE * base_signal_noise
+
+base_measurement_noise = np.random.normal(loc=0, scale=1, size=measurement.shape)
+noisy_measurement = measurement + MEASUREMENT_NOISE_AMPLITUDE * base_measurement_noise
+
+plot_mds(
+    noisy_responses, c=stimulus.orientation, title="Noisy Neural Responses MDS (3D)"
+)
+
+plot_mds(
+    noisy_measurement,
+    c=stimulus.orientation,
+    title="Noisy Measurement Responses MDS (3D)",
+)
+
+noisy_iem = IEM1D(channel_arr)
+noisy_iem.fit(stimulus, noisy_measurement)
+
+noisy_reconstruct_channel = noisy_iem.decode(noisy_measurement)
+
+plot_mds(
+    noisy_measurement, c=stimulus.orientation, title="Noisy Reconstructed MDS (3D)"
+)
 # ================Covariate Noise==================
+
+
+def create_block_noise(
+    block_size=100, total_size=1500, observation: int = 1000, minor_amp: float = 0.1
+):
+    _noise = np.empty((observation, total_size))
+    for i in range(total_size // block_size):
+        _noise[:, block_size * i : block_size * (i + 1)] = np.random.normal(
+            (observation, 1)
+        )
+        _noise[
+            :, block_size * i : block_size * (i + 1)
+        ] += minor_amp * np.random.normal((observation, block_size))
+    l = _noise[:, block_size * (i + 1) :].shape[1]
+    _noise[:, block_size * (i + 1) :] = np.random.normal((observation, 1))
+    _noise[:, block_size * (i + 1) :] += minor_amp * np.random.normal((observation, l))
+    return _noise

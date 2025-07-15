@@ -209,7 +209,7 @@ def plot_representational_distance(
     ax: Optional[Axes] = None,
 ):
     _ax = ax
-    if not _ax:
+    if not ax:
         fig, _ax = plt.subplots()
     if c:
         assert len(c) == len(stimulus_value)
