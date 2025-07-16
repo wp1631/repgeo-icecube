@@ -134,6 +134,8 @@ def plot_mds(
     ylabel: str = "Dimension 2",
     zlabel: str = "Dimension 3",
     title: str = "MDS Embedding of the neural responses (3D)",
+    grid: bool = True,
+    show_axis: bool = False,
     ax: Optional[Axes | Axes3D] = None,
 ):
     _ax = ax
@@ -173,6 +175,9 @@ def plot_mds(
     if dim == 3:
         _ax.set_zlabel(zlabel)
     _ax.set_title(title, wrap=True)
+    _ax.grid(grid)
+    if not show_axis:
+        _ax.set_axis_off()
     if not ax:
         plt.show()
 

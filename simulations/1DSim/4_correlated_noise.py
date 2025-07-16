@@ -214,7 +214,7 @@ plot_RDM(
 )
 
 recf_block_noise_mds_ax = recf_block_noise_subfigs[1].add_subplot(
-    (111), projection="3d"
+    (111), projection="3d", xmargin=0.7
 )
 plot_mds(
     spatial_block_noise_response,
