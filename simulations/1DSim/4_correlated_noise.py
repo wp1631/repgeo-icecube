@@ -197,7 +197,8 @@ plot_mds(
 )
 # ================Covariate Noise==================
 
-block_noise_response = neural_responses + create_block_noise(
+block_noise_response = neural_responses.copy()
+block_noise_response[:, np.argsort(neuron_recf_loc)] += create_block_noise(
     block_size=200, total_size=NR_NUM, observation=ST_NUM
 )
 plot_mds(
