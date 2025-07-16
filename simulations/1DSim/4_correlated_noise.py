@@ -1,7 +1,5 @@
-from os import wait
 import numpy as np
 from icecream import ic
-from scipy.integrate._ivp.bdf import change_D
 from utils.generators.classes_1D import NeuronArray1D, Stimulus1D
 from utils.generators.noise import create_block_noise
 from sklearn.decomposition import PCA
