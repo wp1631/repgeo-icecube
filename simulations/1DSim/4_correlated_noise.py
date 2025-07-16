@@ -45,6 +45,9 @@ CH_RECF_MAX = 3
 # initialize the neuron values
 stimulus_ori = np.random.uniform(ST_OR_MIN, ST_OR_MAX, ST_NUM)
 stimulus_loc = np.random.uniform(ST_LOC_MIN, ST_LOC_MAX, ST_NUM)
+stimulus_contrast = np.full_like(stimulus_loc, 1)
+stimulus_size = np.full_like(stimulus_loc, 1)
+
 
 neuron_tuning_loc = np.linspace(NR_OT_LOC_MIN, NR_OT_LOC_MAX, NR_NUM)
 # neuron_tuning_loc = np.random.uniform(NR_OT_LOC_MIN, NR_OT_LOC_MAX, NR_NUM)
@@ -52,7 +55,12 @@ neuron_tuning_kappa = np.full(NR_NUM, NR_OT_KAPPA)
 neuron_tuning_amp = np.full(NR_NUM, 1)
 neuron_recf_loc = np.random.uniform(ST_LOC_MIN, ST_LOC_MAX, NR_NUM)
 neuron_recf_width = np.full(NR_NUM, NR_LOC_W)
-stimulus = Stimulus1D(spatial_loc=stimulus_loc, orientation=stimulus_ori)
+stimulus = Stimulus1D(
+    stimulus_location=stimulus_loc,
+    stimulus_orientation=stimulus_ori,
+    stimulus_contrast=stimulus_contrast,
+    stimulus_size=stimulus_size,
+)
 
 
 neuron_arr = NeuronArray1D(
