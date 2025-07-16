@@ -47,7 +47,7 @@ class NeuronArray1D:
         return np.array(
             [
                 norm.pdf(
-                    stimulus.spatial_loc,
+                    stimulus.stimulus_location,
                     loc=loc,
                     scale=sc,
                 )
@@ -66,7 +66,7 @@ class NeuronArray1D:
         return np.array(
             [
                 vonmises.pdf(
-                    stimulus.orientation,
+                    stimulus.stimulus_orientation,
                     loc=x,
                     kappa=y,
                 )
@@ -92,8 +92,8 @@ class NeuronArray1D:
         return np.array(
             [
                 y
-                * np.cos(stimulus.orientation - x)
-                * vonmises.pdf(stimulus.orientation, loc=x, kappa=y)
+                * np.cos(stimulus.stimulus_orientation - x)
+                * vonmises.pdf(stimulus.stimulus_orientation, loc=x, kappa=y)
                 for x, y in zip(self._neural_tuning_loc, self._neural_tuning_kappa)
             ]
         ).T

@@ -27,7 +27,7 @@ NR_LOC_W = 0.03
 
 # Stimulus sample
 ST_NUM = 1000
-ST_OR_MIN = -np.pi  # Stimulus orientation
+ST_OR_MIN = -np.pi  # stimulus.stimulus_orientation
 ST_OR_MAX = np.pi
 ST_LOC_MIN = -3
 ST_LOC_MAX = 3
@@ -86,22 +86,24 @@ deriv = neuron_arr.get_derivatives(stimulus)
 deriv_normed = np.linalg.norm(deriv, axis=1)
 fisher_info = deriv_normed / np.sqrt(NR_NUM)
 
-plot_orientation_activation(neural_responses, np.argsort(stimulus.orientation))
+plot_orientation_activation(neural_responses, np.argsort(stimulus.stimulus_orientation))
 
 plot_orientation_fisher_information(stimulus, fisher_info)
 
 # Plot MDS of the neural responses
-plot_mds(neural_responses, c=stimulus.orientation)
+plot_mds(neural_responses, c=stimulus.stimulus_orientation)
 
 # Plot MDS of the orientation gradient
-plot_mds(deriv, c=stimulus.orientation, title="MDS Embedding of the Gradient (3D)")
+plot_mds(
+    deriv, c=stimulus.stimulus_orientation, title="MDS Embedding of the Gradient (3D)"
+)
 
 # Plot MDS of the location gradient
 sort_index = np.argsort(stimulus_ori)
 
 plot_RDM(neural_responses, sort_index)
 
-plot_representational_distance(stimulus.orientation, neural_responses)
+plot_representational_distance(stimulus.stimulus_orientation, neural_responses)
 
 plot_pca_scree(neural_responses)
 
@@ -165,12 +167,12 @@ reconstructed_channal_responses = measurement @ inv_weight
 
 plot_mds(
     reconstructed_channal_responses,
-    c=stimulus.orientation,
+    c=stimulus.stimulus_orientation,
     title="Reconstructed Channel Responses",
 )
 
 plot_representational_distance(
-    stimulus.orientation,
+    stimulus.stimulus_orientation,
     reconstructed_channal_responses,
     title="Reconstructed Representation Distance vs. Feature Distance",
 )
@@ -187,12 +189,14 @@ base_measurement_noise = np.random.normal(loc=0, scale=1, size=measurement.shape
 noisy_measurement = measurement + MEASUREMENT_NOISE_AMPLITUDE * base_measurement_noise
 
 plot_mds(
-    noisy_responses, c=stimulus.orientation, title="Noisy Neural Responses MDS (3D)"
+    noisy_responses,
+    c=stimulus.stimulus_orientation,
+    title="Noisy Neural Responses MDS (3D)",
 )
 
 plot_mds(
     noisy_measurement,
-    c=stimulus.orientation,
+    c=stimulus.stimulus_orientation,
     title="Noisy Measurement Responses MDS (3D)",
 )
 
@@ -202,7 +206,9 @@ noisy_iem.fit(stimulus, noisy_measurement)
 noisy_reconstruct_channel = noisy_iem.decode(noisy_measurement)
 
 plot_mds(
-    noisy_measurement, c=stimulus.orientation, title="Noisy Reconstructed MDS (3D)"
+    noisy_measurement,
+    c=stimulus.stimulus_orientation,
+    title="Noisy Reconstructed MDS (3D)",
 )
 # ================Covariate Noise==================
 
@@ -226,7 +232,7 @@ recf_block_noise_mds_ax = recf_block_noise_subfigs[1].add_subplot(
 )
 plot_mds(
     spatial_block_noise_response,
-    c=stimulus.orientation,
+    c=stimulus.stimulus_orientation,
     title="Receptive Field Block Noise Neural Responses MDS (3D)",
     ax=recf_block_noise_mds_ax,
 )
@@ -239,6 +245,6 @@ block_noisy_channel = block_noise_iem.decode(noisy_measurement)
 
 plot_mds(
     block_noisy_channel,
-    c=stimulus.orientation,
+    c=stimulus.stimulus_orientation,
     title="Receptive Field Block Noise Reconstruction MDS (3D)",
 )

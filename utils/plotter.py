@@ -16,7 +16,6 @@ def get_max_vonmises(kappa: float):
     return np.exp(kappa) / (2 * np.pi * i0(kappa))
 
 
-# plot neural tuning profile
 def plot_neural_orientation_tuning_profile(
     stimulus: Stimulus1D,
     neuron_tuning_loc: np.ndarray,
@@ -32,7 +31,7 @@ def plot_neural_orientation_tuning_profile(
     _ax = ax
     if not ax:
         fig, _ax = plt.subplots(dpi=dpi)
-    probe_stim = np.sort(stimulus.orientation)
+    probe_stim = np.sort(stimulus.stimulus_orientation)
     num_lines = 1 + len(neuron_tuning_loc) // plot_every
     _center = num_lines // 2
     _cmap = mpl.colormaps[cmap]
@@ -108,10 +107,13 @@ def plot_orientation_fisher_information(
         fig, _ax = plt.subplots()
     if colored_by_spatial_loc:
         _ax.scatter(
-            stimulus.orientation, fisher_info, c=stimulus.spatial_loc, cmap=cmap
+            stimulus.stimulus_orientation,
+            fisher_info,
+            c=stimulus.stimulus_location,
+            cmap=cmap,
         )
     else:
-        _ax.scatter(stimulus.orientation, fisher_info)
+        _ax.scatter(stimulus.stimulus_orientation, fisher_info)
     _ax.set_title("Fisher Information $J(\\theta)$", wrap=True)
     _ax.set_xlabel("Orientation")
     _ax.set_xticks(
