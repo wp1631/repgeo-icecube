@@ -60,7 +60,7 @@ def plot_neural_orientation_tuning_profile(
         alpha=1,
         c=_colors[_center],
     )
-    _ax.set_title("Neural Tuning Function")
+    _ax.set_title("Neural Tuning Function", wrap=True)
     _ax.set_xlabel("Orientation")
     _ax.set_xticks(
         [-np.pi, -np.pi / 2, 0, np.pi / 2, np.pi],
@@ -90,7 +90,7 @@ def plot_orientation_activation(
     _ax.imshow(neural_responses_sorted, cmap=cmap)
     _ax.set_xlabel(xlabel)
     _ax.set_ylabel(ylabel)
-    _ax.set_title(title)
+    _ax.set_title(title, wrap=True)
     if not ax:
         plt.show()
 
@@ -112,7 +112,7 @@ def plot_orientation_fisher_information(
         )
     else:
         _ax.scatter(stimulus.orientation, fisher_info)
-    _ax.set_title("Fisher Information $J(\\theta)$")
+    _ax.set_title("Fisher Information $J(\\theta)$", wrap=True)
     _ax.set_xlabel("Orientation")
     _ax.set_xticks(
         [-np.pi, -np.pi / 2, 0, np.pi / 2, np.pi],
@@ -172,7 +172,7 @@ def plot_mds(
     _ax.set_ylabel(ylabel)
     if dim == 3:
         _ax.set_zlabel(zlabel)
-    _ax.set_title(title)
+    _ax.set_title(title, wrap=True)
     if not ax:
         plt.show()
 
@@ -221,7 +221,7 @@ def plot_representational_distance(
     _ax.scatter(stim_dist, rep_dist, alpha=alpha, c=c)
     _ax.set_xlabel(xlabel)
     _ax.set_ylabel(ylabel)
-    _ax.set_title(title)
+    _ax.set_title(title, wrap=True)
     if not ax:
         plt.show()
 
@@ -241,6 +241,6 @@ def plot_pca_scree(
     pca.fit(neural_responses)
     var = pca.explained_variance_ratio_
     _ax.scatter(np.arange(dim) + 1, var[:dim])
-    _ax.set_title(title)
+    _ax.set_title(title, wrap=True)
     if not _ax:
         plt.show()

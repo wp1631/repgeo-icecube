@@ -14,6 +14,7 @@ from utils.plotter import (
 )
 from utils.statistical_sampling import create_voxel_sampling
 from utils.iem import IEM1D
+import matplotlib.pyplot as plt
 
 # ============Define Parameters==============
 NR_NUM = 3000
@@ -197,15 +198,32 @@ plot_mds(
 )
 # ================Covariate Noise==================
 
-block_noise_response = neural_responses.copy()
-block_noise_response[:, np.argsort(neuron_recf_loc)] += create_block_noise(
+spatial_block_noise_response = neural_responses.copy()
+spatial_block_noise_response[:, np.argsort(neuron_recf_loc)] += create_block_noise(
     block_size=200, total_size=NR_NUM, observation=ST_NUM
 )
-plot_mds(
-    block_noise_response,
-    c=stimulus.orientation,
-    title="Block Noise Neural Responses MDS (3D)",
+
+recf_block_noise_fig = plt.figure()
+recf_block_noise_subfigs = recf_block_noise_fig.subfigures(1, 2)
+recf_block_noise_rdm_ax = recf_block_noise_subfigs[0].add_subplot((111))
+
+plot_RDM(
+    spatial_block_noise_response,
+    sort_index,
+    ax=recf_block_noise_rdm_ax,
 )
+
+recf_block_noise_mds_ax = recf_block_noise_subfigs[1].add_subplot(
+    (111), projection="3d"
+)
+plot_mds(
+    spatial_block_noise_response,
+    c=stimulus.orientation,
+    title="Receptive Field Block Noise Neural Responses MDS (3D)",
+    ax=recf_block_noise_mds_ax,
+)
+
+plt.show()
 
 block_noise_iem = IEM1D(channel_arr)
 block_noise_iem.fit(stimulus, noisy_measurement)
@@ -214,5 +232,5 @@ block_noisy_channel = block_noise_iem.decode(noisy_measurement)
 plot_mds(
     block_noisy_channel,
     c=stimulus.orientation,
-    title="Block Noise Reconstruction MDS (3D)",
+    title="Receptive Field Block Noise Reconstruction MDS (3D)",
 )
