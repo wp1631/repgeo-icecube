@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, cast
 import numpy as np
 from scipy.stats import vonmises
 from scipy.special import i0
@@ -10,28 +10,93 @@ import matplotlib as mpl
 from matplotlib.axes import Axes
 from mpl_toolkits.mplot3d import Axes3D
 from sklearn.decomposition import PCA
+from typing import overload
+from matplotlib.figure import Figure, SubFigure
+import numpy.typing as npt
 
 
-def get_max_vonmises(kappa: float):
+def get_max_vonmises(kappa: float | int):
     return np.exp(kappa) / (2 * np.pi * i0(kappa))
+
+
+def _get_ax(
+    ax: Optional[Axes | Axes3D] = None,
+    fig: Optional[Figure | SubFigure] = None,
+    projection: Optional[str] = None,
+) -> Axes | Axes3D:
+    if (ax is None) and (fig is None):
+        return plt.subplot(projection=projection)
+    elif isinstance(ax, (Axes, Axes3D)) and isinstance(fig, (Figure, SubFigure)):
+        assert (
+            ax in fig.get_axes()
+        ), f"{ax} object is not in {fig}, cannot plot in the same figure"
+        return cast(Axes, ax)
+    elif isinstance(fig, (Figure, SubFigure)):
+        fig = cast(Figure | SubFigure, fig)
+        return fig.add_subplot(111, projection=projection)
+    else:
+        if isinstance(ax, Axes3D):
+            return cast(Axes3D, ax)
+        elif isinstance(ax, Axes):
+            return cast(Axes, ax)
+        raise ValueError("Invalid ax type")
+
+
+@overload
+def plot_neural_orientation_tuning_profile(
+    stimulus: Stimulus1D,
+    neuron_tuning_loc: npt.NDArray[np.float64],
+    neuron_tuning_kappa: npt.NDArray[np.float64],
+    neuron_tuning_amp: npt.NDArray[np.float64],
+    *,
+    plot_every: int = 300,
+    alpha: float = 0.2,
+    cmap: str = "twilight",
+    ax: Axes,
+): ...
+
+
+@overload
+def plot_neural_orientation_tuning_profile(
+    stimulus: Stimulus1D,
+    neuron_tuning_loc: npt.NDArray[np.float64],
+    neuron_tuning_kappa: npt.NDArray[np.float64],
+    neuron_tuning_amp: npt.NDArray[np.float64],
+    *,
+    plot_every: int = 300,
+    alpha: float = 0.2,
+    cmap: str = "twilight",
+    fig: Figure | SubFigure,
+): ...
+
+
+@overload
+def plot_neural_orientation_tuning_profile(
+    stimulus: Stimulus1D,
+    neuron_tuning_loc: npt.NDArray[np.float64],
+    neuron_tuning_kappa: npt.NDArray[np.float64],
+    neuron_tuning_amp: npt.NDArray[np.float64],
+    *,
+    plot_every: int = 300,
+    alpha: float = 0.2,
+    cmap: str = "twilight",
+): ...
 
 
 # plot neural tuning profile
 def plot_neural_orientation_tuning_profile(
     stimulus: Stimulus1D,
-    neuron_tuning_loc: np.ndarray,
-    neuron_tuning_kappa: np.ndarray,
-    neuron_tuning_amp: np.ndarray,
-    /,
-    dpi: int = 200,
+    neuron_tuning_loc: npt.NDArray[np.float64],
+    neuron_tuning_kappa: npt.NDArray[np.float64],
+    neuron_tuning_amp: npt.NDArray[np.float64],
+    *,
     plot_every: int = 300,
     alpha: float = 0.2,
     cmap: str = "twilight",
     ax: Optional[Axes] = None,
+    fig: Optional[Figure | SubFigure] = None,
 ):
-    _ax = ax
-    if not ax:
-        fig, _ax = plt.subplots(dpi=dpi)
+    _ax = _get_ax(ax, fig)
     probe_stim = np.sort(stimulus.orientation)
     num_lines = 1 + len(neuron_tuning_loc) // plot_every
     _center = num_lines // 2
@@ -69,43 +134,105 @@ def plot_neural_orientation_tuning_profile(
     _ax.set_ylim(
         0, np.max(get_max_vonmises(np.max(neuron_tuning_kappa[::plot_every])) * 1.1)
     )
-    if not ax:
+    if (ax is None) and (fig is None):
         plt.show()
 
 
+@overload
 def plot_orientation_activation(
-    neural_responses: np.ndarray,
-    sort_index: np.ndarray,
-    /,
+    neural_responses: npt.NDArray[np.float64],
+    sort_index: npt.NDArray[np.int64],
+    *,
+    cmap: str = "binary",
+    xlabel: str = "neuron_id",
+    ylabel: str = "stimulus",
+    title: str = "Neural Activation vs Stimulus",
+    ax: Axes,
+): ...
+
+
+@overload
+def plot_orientation_activation(
+    neural_responses: npt.NDArray[np.float64],
+    sort_index: npt.NDArray[np.int64],
+    *,
+    cmap: str = "binary",
+    xlabel: str = "neuron_id",
+    ylabel: str = "stimulus",
+    title: str = "Neural Activation vs Stimulus",
+    fig: Figure | SubFigure,
+): ...
+
+
+@overload
+def plot_orientation_activation(
+    neural_responses: npt.NDArray[np.float64],
+    sort_index: npt.NDArray[np.int64],
+    *,
+    cmap: str = "binary",
+    xlabel: str = "neuron_id",
+    ylabel: str = "stimulus",
+    title: str = "Neural Activation vs Stimulus",
+): ...
+def plot_orientation_activation(
+    neural_responses: npt.NDArray[np.float64],
+    sort_index: npt.NDArray[np.int64],
+    *,
     cmap: str = "binary",
     xlabel: str = "neuron_id",
     ylabel: str = "stimulus",
     title: str = "Neural Activation vs Stimulus",
     ax: Optional[Axes] = None,
+    fig: Optional[Figure | SubFigure] = None,
 ):
-    _ax = ax
-    if not ax:
-        fig, _ax = plt.subplots()
+    _ax = _get_ax(ax, fig)
     neural_responses_sorted = neural_responses[sort_index]
     _ax.imshow(neural_responses_sorted, cmap=cmap)
     _ax.set_xlabel(xlabel)
     _ax.set_ylabel(ylabel)
     _ax.set_title(title)
-    if not ax:
+    if (ax is None) and (fig is None):
         plt.show()
 
 
+@overload
 def plot_orientation_fisher_information(
     stimulus: Stimulus1D,
-    fisher_info: np.ndarray,
-    /,
+    fisher_info: npt.NDArray[np.float64],
+    *,
+    colored_by_spatial_loc: bool = True,
+    cmap: str = "inferno",
+): ...
+
+
+@overload
+def plot_orientation_fisher_information(
+    stimulus: Stimulus1D,
+    fisher_info: npt.NDArray[np.float64],
+    *,
+    colored_by_spatial_loc: bool = True,
+    cmap: str = "inferno",
+    ax: Axes,
+): ...
+@overload
+def plot_orientation_fisher_information(
+    stimulus: Stimulus1D,
+    fisher_info: npt.NDArray[np.float64],
+    *,
+    colored_by_spatial_loc: bool = True,
+    cmap: str = "inferno",
+    fig: Figure | SubFigure,
+): ...
+def plot_orientation_fisher_information(
+    stimulus: Stimulus1D,
+    fisher_info: npt.NDArray[np.float64],
+    *,
     colored_by_spatial_loc: bool = True,
     cmap: str = "inferno",
     ax: Optional[Axes] = None,
+    fig: Optional[Figure | SubFigure] = None,
 ):
-    _ax = ax
-    if not ax:
-        fig, _ax = plt.subplots()
+    _ax = _get_ax(ax, fig)
     if colored_by_spatial_loc:
         _ax.scatter(
             stimulus.orientation, fisher_info, c=stimulus.spatial_loc, cmap=cmap
@@ -119,14 +246,61 @@ def plot_orientation_fisher_information(
         ["$-\pi /2$", "$-\pi /4$", "0", "$\pi/4$", "$\pi/2$"],
     )
     _ax.set_ylim(0, np.max(fisher_info * 1.1))
-    if not ax:
+    if (ax is None) and (fig is None):
         plt.show()
 
 
+@overload
 def plot_mds(
-    data: np.ndarray,
+    data: npt.NDArray[np.float64],
     dim: int = 3,
-    /,
+    *,
+    alpha: float = 0.3,
+    c: Optional[np.ndarray] = None,
+    cmap: str = "hsv",
+    xlabel: str = "Dimension 1",
+    ylabel: str = "Dimension 2",
+    zlabel: str = "Dimension 3",
+    title: str = "MDS Embedding of the neural responses (3D)",
+): ...
+
+
+@overload
+def plot_mds(
+    data: npt.NDArray[np.float64],
+    dim: int = 3,
+    *,
+    alpha: float = 0.3,
+    c: Optional[np.ndarray] = None,
+    cmap: str = "hsv",
+    xlabel: str = "Dimension 1",
+    ylabel: str = "Dimension 2",
+    zlabel: str = "Dimension 3",
+    title: str = "MDS Embedding of the neural responses (3D)",
+    ax: Axes | Axes3D,
+): ...
+
+
+@overload
+def plot_mds(
+    data: npt.NDArray[np.float64],
+    dim: int = 3,
+    *,
+    alpha: float = 0.3,
+    c: Optional[np.ndarray] = None,
+    cmap: str = "hsv",
+    xlabel: str = "Dimension 1",
+    ylabel: str = "Dimension 2",
+    zlabel: str = "Dimension 3",
+    title: str = "MDS Embedding of the neural responses (3D)",
+    fig: Figure | SubFigure,
+): ...
+
+
+def plot_mds(
+    data: npt.NDArray[np.float64],
+    dim: int = 3,
+    *,
     alpha: float = 0.3,
     c: Optional[np.ndarray] = None,
     cmap: str = "hsv",
@@ -135,17 +309,23 @@ def plot_mds(
     zlabel: str = "Dimension 3",
     title: str = "MDS Embedding of the neural responses (3D)",
     ax: Optional[Axes | Axes3D] = None,
+    fig: Optional[Figure | SubFigure] = None,
 ):
-    _ax = ax
-    if not ax:
-        fig = plt.figure()
-        _ax = fig.add_subplot(111, projection="3d")
+    if dim == 3:
+        _ax = _get_ax(ax, fig, projection="3d")
+    elif dim == 2:
+        _ax = _get_ax(ax, fig)
+    else:
+        raise NotImplementedError(
+            "Dimension for plot is not correct; need to be 2 or 3"
+        )
+
     embedding = MDS(n_components=dim)
-    _transformed_3d = embedding.fit_transform(data)
+    _transformed = cast(npt.NDArray[np.float64], embedding.fit_transform(data))
     if dim == 2:
         _ax.scatter(
-            _transformed_3d[:, 0],
-            _transformed_3d[:, 1],
+            _transformed[:, 0],
+            _transformed[:, 1],
             c=c,
             alpha=alpha,
             cmap=cmap,
@@ -156,16 +336,12 @@ def plot_mds(
                 "Incongruent dimension of the plot and matplotlib ax projection"
             )
         _ax.scatter(
-            _transformed_3d[:, 0],
-            _transformed_3d[:, 1],
-            _transformed_3d[:, 2],
+            _transformed[:, 0],
+            _transformed[:, 1],
+            _transformed[:, 2],
             c=c,
             alpha=alpha,
             cmap=cmap,
-        )
-    else:
-        raise NotImplementedError(
-            "Dimension for plot is not correct; need to be 2 or 3"
         )
 
     _ax.set_xlabel(xlabel)
@@ -173,44 +349,108 @@ def plot_mds(
     if dim == 3:
         _ax.set_zlabel(zlabel)
     _ax.set_title(title)
-    if not ax:
+    if (ax is None) and (fig is None):
         plt.show()
 
 
+@overload
 def plot_RDM(
-    neural_responses: np.ndarray,
-    sort_index: np.ndarray,
-    /,
+    neural_responses: npt.NDArray[np.float64],
+    sort_index: npt.NDArray[np.int64],
+    *,
+    cmap: str = "binary",
+): ...
+@overload
+def plot_RDM(
+    neural_responses: npt.NDArray[np.float64],
+    sort_index: npt.NDArray[np.int64],
+    *,
+    cmap: str = "binary",
+    ax: Axes,
+): ...
+@overload
+def plot_RDM(
+    neural_responses: npt.NDArray[np.float64],
+    sort_index: npt.NDArray[np.int64],
+    *,
+    cmap: str = "binary",
+    fig: Figure | SubFigure,
+): ...
+
+
+def plot_RDM(
+    neural_responses: npt.NDArray[np.float64],
+    sort_index: npt.NDArray[np.int64],
+    *,
     cmap: str = "binary",
     ax: Optional[Axes] = None,
+    fig: Optional[Figure | SubFigure] = None,
 ):
-    _ax = ax
-    if not ax:
-        fig, _ax = plt.subplots()
+    _ax = _get_ax(ax, fig)
     neural_responses_sorted = neural_responses[sort_index]
 
     p_dist = pdist(neural_responses_sorted)
     dist_mat = squareform(p_dist)
 
     _ax.imshow(dist_mat, cmap=cmap)
-    if not ax:
+    if (ax is None) and (fig is None):
         plt.show()
 
 
+@overload
 def plot_representational_distance(
-    stimulus_value: np.ndarray,
-    neural_responses: np.ndarray,
-    /,
+    stimulus_value: npt.NDArray[np.float64],
+    neural_responses: npt.NDArray[np.float64],
+    *,
+    c: Optional[np.ndarray] = None,
+    alpha: float = 0.2,
+    xlabel: str = "feature distance",
+    ylabel: str = "representation distance",
+    title: str = "Representation distance vs. Feature distance",
+): ...
+
+
+@overload
+def plot_representational_distance(
+    stimulus_value: npt.NDArray[np.float64],
+    neural_responses: npt.NDArray[np.float64],
+    *,
+    c: Optional[np.ndarray] = None,
+    alpha: float = 0.2,
+    xlabel: str = "feature distance",
+    ylabel: str = "representation distance",
+    title: str = "Representation distance vs. Feature distance",
+    ax: Axes,
+): ...
+
+
+@overload
+def plot_representational_distance(
+    stimulus_value: npt.NDArray[np.float64],
+    neural_responses: npt.NDArray[np.float64],
+    *,
+    c: Optional[np.ndarray] = None,
+    alpha: float = 0.2,
+    xlabel: str = "feature distance",
+    ylabel: str = "representation distance",
+    title: str = "Representation distance vs. Feature distance",
+    fig: Figure | SubFigure,
+): ...
+
+
+def plot_representational_distance(
+    stimulus_value: npt.NDArray[np.float64],
+    neural_responses: npt.NDArray[np.float64],
+    *,
     c: Optional[np.ndarray] = None,
     alpha: float = 0.2,
     xlabel: str = "feature distance",
     ylabel: str = "representation distance",
     title: str = "Representation distance vs. Feature distance",
     ax: Optional[Axes] = None,
+    fig: Optional[Figure | SubFigure] = None,
 ):
-    _ax = ax
-    if not ax:
-        fig, _ax = plt.subplots()
+    _ax = _get_ax(ax, fig)
     if c:
         assert len(c) == len(stimulus_value)
     sort_index = np.argsort(stimulus_value)
@@ -222,25 +462,48 @@ def plot_representational_distance(
     _ax.set_xlabel(xlabel)
     _ax.set_ylabel(ylabel)
     _ax.set_title(title)
-    if not ax:
+    if (ax is None) and (fig is None):
         plt.show()
 
 
+@overload
 def plot_pca_scree(
-    neural_responses: np.ndarray,
+    neural_responses: npt.NDArray[np.float64],
     dim: int = 15,
-    /,
-    ax: Optional[Axes] = None,
+    *,
     title: str = "Scree Plot",
-):
-    _ax = ax
-    if not _ax:
-        fig, _ax = plt.subplots()
+): ...
+@overload
+def plot_pca_scree(
+    neural_responses: npt.NDArray[np.float64],
+    dim: int = 15,
+    *,
+    title: str = "Scree Plot",
+    ax: Axes,
+): ...
+@overload
+def plot_pca_scree(
+    neural_responses: npt.NDArray[np.float64],
+    dim: int = 15,
+    *,
+    title: str = "Scree Plot",
+    fig: Figure | SubFigure,
+): ...
 
+
+def plot_pca_scree(
+    neural_responses: npt.NDArray[np.float64],
+    dim: int = 15,
+    *,
+    title: str = "Scree Plot",
+    ax: Optional[Axes] = None,
+    fig: Optional[Figure | SubFigure] = None,
+):
+    _ax = _get_ax(ax, fig)
     pca = PCA()
     pca.fit(neural_responses)
     var = pca.explained_variance_ratio_
     _ax.scatter(np.arange(dim) + 1, var[:dim])
     _ax.set_title(title)
-    if not _ax:
+    if (ax is None) and (fig is None):
         plt.show()
