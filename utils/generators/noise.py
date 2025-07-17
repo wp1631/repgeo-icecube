@@ -2,7 +2,11 @@ import numpy as np
 
 
 def create_block_noise(
-    block_size=5, total_size=50, observation: int = 3, minor_amp: float = 0.1
+    block_size=5,
+    total_size=50,
+    observation: int = 3,
+    amplitude: float = 0.1,
+    minor_amp: float = 0.1,
 ):
     _noise = np.empty((observation, total_size))
     _n = total_size // block_size
@@ -17,4 +21,4 @@ def create_block_noise(
     if l > 0:
         _noise[:, block_size * (_n) :] = np.random.normal((observation, 1))
         _noise[:, block_size * (_n) :] += minor_amp * np.random.normal((observation, l))
-    return _noise
+    return amplitude * _noise

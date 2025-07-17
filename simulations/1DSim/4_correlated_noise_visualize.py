@@ -24,7 +24,7 @@ NR_NUM = 3000
 NR_OT_LOC_MIN = -np.pi  # Neuron minimum orientation tuning location
 NR_OT_LOC_MAX = np.pi
 NR_OT_KAPPA = 5
-NR_LOC_W = 1000
+NR_LOC_W = 0.03
 
 # Stimulus sample
 ST_NUM = 500
@@ -181,11 +181,6 @@ channel_arr = NeuronArray1D(
 channel_activation = channel_arr.get_responses(stimulus=stimulus).T
 
 plot_mds(
-    deriv,
-    c=stimulus.stimulus_orientation,
-    title="MDS Embedding of the Gradient (3D)",
-)
-plot_mds(
     channel_activation,
     c=stimulus.stimulus_orientation,
     title="MDS Embedding of Channel Activation (3D)",
@@ -307,8 +302,8 @@ plot_RDM(
 plot_pca_scree(recf_block_noise_measure)
 
 block_noise_iem = IEM1D(channel_arr)
-block_noise_iem.fit(stimulus, noisy_measurement)
-block_noisy_channel_recon = block_noise_iem.decode(noisy_measurement)
+block_noise_iem.fit(stimulus, recf_block_noise_measure)
+block_noisy_channel_recon = block_noise_iem.decode(recf_block_noise_measure)
 
 plot_mds(
     block_noisy_channel_recon,

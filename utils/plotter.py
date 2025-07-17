@@ -534,7 +534,8 @@ def plot_pca_scree(
     pca = PCA()
     pca.fit(neural_responses)
     var = pca.explained_variance_ratio_
-    _ax.scatter(np.arange(dim) + 1, var[:dim])
+    _use_dim = min(dim, len(var))
+    _ax.scatter(np.arange(_use_dim) + 1, var[:_use_dim])
     _ax.set_title(title, wrap=True)
     _ax.set_ylim(0, 0.7)
     if (ax is None) and (fig is None):
