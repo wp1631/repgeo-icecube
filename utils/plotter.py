@@ -1,4 +1,4 @@
-from typing import Optional, cast
+from typing import Optional, cast, Any
 import numpy as np
 from scipy.stats import vonmises
 from scipy.special import i0
@@ -45,9 +45,9 @@ def _get_ax(
 @overload
 def plot_neural_orientation_tuning_profile(
     stimulus: Stimulus1D,
-    neuron_tuning_loc: npt.NDArray[np.float64],
-    neuron_tuning_kappa: npt.NDArray[np.float64],
-    neuron_tuning_amp: npt.NDArray[np.float64],
+    neuron_tuning_loc: npt.NDArray[np.floating[Any]],
+    neuron_tuning_kappa: npt.NDArray[np.floating[Any]],
+    neuron_tuning_amp: npt.NDArray[np.floating[Any]],
     *,
     plot_every: int = 300,
     alpha: float = 0.2,
@@ -59,9 +59,9 @@ def plot_neural_orientation_tuning_profile(
 @overload
 def plot_neural_orientation_tuning_profile(
     stimulus: Stimulus1D,
-    neuron_tuning_loc: npt.NDArray[np.float64],
-    neuron_tuning_kappa: npt.NDArray[np.float64],
-    neuron_tuning_amp: npt.NDArray[np.float64],
+    neuron_tuning_loc: npt.NDArray[np.floating[Any]],
+    neuron_tuning_kappa: npt.NDArray[np.floating[Any]],
+    neuron_tuning_amp: npt.NDArray[np.floating[Any]],
     *,
     plot_every: int = 300,
     alpha: float = 0.2,
@@ -73,9 +73,9 @@ def plot_neural_orientation_tuning_profile(
 @overload
 def plot_neural_orientation_tuning_profile(
     stimulus: Stimulus1D,
-    neuron_tuning_loc: npt.NDArray[np.float64],
-    neuron_tuning_kappa: npt.NDArray[np.float64],
-    neuron_tuning_amp: npt.NDArray[np.float64],
+    neuron_tuning_loc: npt.NDArray[np.floating[Any]],
+    neuron_tuning_kappa: npt.NDArray[np.floating[Any]],
+    neuron_tuning_amp: npt.NDArray[np.floating[Any]],
     *,
     plot_every: int = 300,
     alpha: float = 0.2,
@@ -85,9 +85,9 @@ def plot_neural_orientation_tuning_profile(
 
 def plot_neural_orientation_tuning_profile(
     stimulus: Stimulus1D,
-    neuron_tuning_loc: npt.NDArray[np.float64],
-    neuron_tuning_kappa: npt.NDArray[np.float64],
-    neuron_tuning_amp: npt.NDArray[np.float64],
+    neuron_tuning_loc: npt.NDArray[np.floating[Any]],
+    neuron_tuning_kappa: npt.NDArray[np.floating[Any]],
+    neuron_tuning_amp: npt.NDArray[np.floating[Any]],
     *,
     plot_every: int = 300,
     alpha: float = 0.2,
@@ -139,7 +139,7 @@ def plot_neural_orientation_tuning_profile(
 
 @overload
 def plot_orientation_activation(
-    neural_responses: npt.NDArray[np.float64],
+    neural_responses: npt.NDArray[np.floating[Any]],
     sort_index: npt.NDArray[np.int64],
     *,
     cmap: str = "binary",
@@ -152,7 +152,7 @@ def plot_orientation_activation(
 
 @overload
 def plot_orientation_activation(
-    neural_responses: npt.NDArray[np.float64],
+    neural_responses: npt.NDArray[np.floating[Any]],
     sort_index: npt.NDArray[np.int64],
     *,
     cmap: str = "binary",
@@ -165,7 +165,7 @@ def plot_orientation_activation(
 
 @overload
 def plot_orientation_activation(
-    neural_responses: npt.NDArray[np.float64],
+    neural_responses: npt.NDArray[np.floating[Any]],
     sort_index: npt.NDArray[np.int64],
     *,
     cmap: str = "binary",
@@ -174,7 +174,7 @@ def plot_orientation_activation(
     title: str = "Neural Activation vs Stimulus",
 ): ...
 def plot_orientation_activation(
-    neural_responses: npt.NDArray[np.float64],
+    neural_responses: npt.NDArray[np.floating[Any]],
     sort_index: npt.NDArray[np.int64],
     *,
     cmap: str = "binary",
@@ -197,7 +197,7 @@ def plot_orientation_activation(
 @overload
 def plot_orientation_fisher_information(
     stimulus: Stimulus1D,
-    fisher_info: npt.NDArray[np.float64],
+    fisher_info: npt.NDArray[np.floating[Any]],
     *,
     colored_by_spatial_loc: bool = True,
     cmap: str = "inferno",
@@ -207,7 +207,7 @@ def plot_orientation_fisher_information(
 @overload
 def plot_orientation_fisher_information(
     stimulus: Stimulus1D,
-    fisher_info: npt.NDArray[np.float64],
+    fisher_info: npt.NDArray[np.floating[Any]],
     *,
     colored_by_spatial_loc: bool = True,
     cmap: str = "inferno",
@@ -216,7 +216,7 @@ def plot_orientation_fisher_information(
 @overload
 def plot_orientation_fisher_information(
     stimulus: Stimulus1D,
-    fisher_info: npt.NDArray[np.float64],
+    fisher_info: npt.NDArray[np.floating[Any]],
     *,
     colored_by_spatial_loc: bool = True,
     cmap: str = "inferno",
@@ -224,7 +224,7 @@ def plot_orientation_fisher_information(
 ): ...
 def plot_orientation_fisher_information(
     stimulus: Stimulus1D,
-    fisher_info: npt.NDArray[np.float64],
+    fisher_info: npt.NDArray[np.floating[Any]],
     *,
     colored_by_spatial_loc: bool = True,
     cmap: str = "inferno",
@@ -254,7 +254,7 @@ def plot_orientation_fisher_information(
 
 @overload
 def plot_mds(
-    data: npt.NDArray[np.float64],
+    data: npt.NDArray[np.floating[Any]],
     dim: int = 3,
     *,
     alpha: float = 0.3,
@@ -271,7 +271,7 @@ def plot_mds(
 
 @overload
 def plot_mds(
-    data: npt.NDArray[np.float64],
+    data: npt.NDArray[np.floating[Any]],
     dim: int = 3,
     *,
     alpha: float = 0.3,
@@ -289,7 +289,7 @@ def plot_mds(
 
 @overload
 def plot_mds(
-    data: npt.NDArray[np.float64],
+    data: npt.NDArray[np.floating[Any]],
     dim: int = 3,
     *,
     alpha: float = 0.3,
@@ -306,7 +306,7 @@ def plot_mds(
 
 
 def plot_mds(
-    data: npt.NDArray[np.float64],
+    data: npt.NDArray[np.floating[Any]],
     dim: int = 3,
     *,
     alpha: float = 0.3,
@@ -331,7 +331,7 @@ def plot_mds(
         )
 
     embedding = MDS(n_components=dim)
-    _transformed = cast(npt.NDArray[np.float64], embedding.fit_transform(data))
+    _transformed = cast(npt.NDArray[np.floating[Any]], embedding.fit_transform(data))
     if dim == 2:
         _ax.scatter(
             _transformed[:, 0],
@@ -368,14 +368,14 @@ def plot_mds(
 
 @overload
 def plot_RDM(
-    neural_responses: npt.NDArray[np.float64],
+    neural_responses: npt.NDArray[np.floating[Any]],
     sort_index: npt.NDArray[np.int64],
     *,
     cmap: str = "binary",
 ): ...
 @overload
 def plot_RDM(
-    neural_responses: npt.NDArray[np.float64],
+    neural_responses: npt.NDArray[np.floating[Any]],
     sort_index: npt.NDArray[np.int64],
     *,
     cmap: str = "binary",
@@ -383,7 +383,7 @@ def plot_RDM(
 ): ...
 @overload
 def plot_RDM(
-    neural_responses: npt.NDArray[np.float64],
+    neural_responses: npt.NDArray[np.floating[Any]],
     sort_index: npt.NDArray[np.int64],
     *,
     cmap: str = "binary",
@@ -392,7 +392,7 @@ def plot_RDM(
 
 
 def plot_RDM(
-    neural_responses: npt.NDArray[np.float64],
+    neural_responses: npt.NDArray[np.floating[Any]],
     sort_index: npt.NDArray[np.int64],
     *,
     cmap: str = "binary",
@@ -412,8 +412,8 @@ def plot_RDM(
 
 @overload
 def plot_representational_distance(
-    stimulus_value: npt.NDArray[np.float64],
-    neural_responses: npt.NDArray[np.float64],
+    stimulus_value: npt.NDArray[np.floating[Any]],
+    neural_responses: npt.NDArray[np.floating[Any]],
     *,
     c: Optional[np.ndarray] = None,
     alpha: float = 0.2,
@@ -425,8 +425,8 @@ def plot_representational_distance(
 
 @overload
 def plot_representational_distance(
-    stimulus_value: npt.NDArray[np.float64],
-    neural_responses: npt.NDArray[np.float64],
+    stimulus_value: npt.NDArray[np.floating[Any]],
+    neural_responses: npt.NDArray[np.floating[Any]],
     *,
     c: Optional[np.ndarray] = None,
     alpha: float = 0.2,
@@ -439,8 +439,8 @@ def plot_representational_distance(
 
 @overload
 def plot_representational_distance(
-    stimulus_value: npt.NDArray[np.float64],
-    neural_responses: npt.NDArray[np.float64],
+    stimulus_value: npt.NDArray[np.floating[Any]],
+    neural_responses: npt.NDArray[np.floating[Any]],
     *,
     c: Optional[np.ndarray] = None,
     alpha: float = 0.2,
@@ -452,8 +452,8 @@ def plot_representational_distance(
 
 
 def plot_representational_distance(
-    stimulus_value: npt.NDArray[np.float64],
-    neural_responses: npt.NDArray[np.float64],
+    stimulus_value: npt.NDArray[np.floating[Any]],
+    neural_responses: npt.NDArray[np.floating[Any]],
     *,
     c: Optional[np.ndarray] = None,
     alpha: float = 0.2,
@@ -481,14 +481,14 @@ def plot_representational_distance(
 
 @overload
 def plot_pca_scree(
-    neural_responses: npt.NDArray[np.float64],
+    neural_responses: npt.NDArray[np.floating[Any]],
     dim: int = 15,
     *,
     title: str = "Scree Plot",
 ): ...
 @overload
 def plot_pca_scree(
-    neural_responses: npt.NDArray[np.float64],
+    neural_responses: npt.NDArray[np.floating[Any]],
     dim: int = 15,
     *,
     title: str = "Scree Plot",
@@ -496,7 +496,7 @@ def plot_pca_scree(
 ): ...
 @overload
 def plot_pca_scree(
-    neural_responses: npt.NDArray[np.float64],
+    neural_responses: npt.NDArray[np.floating[Any]],
     dim: int = 15,
     *,
     title: str = "Scree Plot",
@@ -505,7 +505,7 @@ def plot_pca_scree(
 
 
 def plot_pca_scree(
-    neural_responses: npt.NDArray[np.float64],
+    neural_responses: npt.NDArray[np.floating[Any]],
     dim: int = 15,
     *,
     title: str = "Scree Plot",
