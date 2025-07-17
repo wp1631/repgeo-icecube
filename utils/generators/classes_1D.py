@@ -6,8 +6,10 @@ from icecream import ic
 
 @dataclass
 class Stimulus1D:
-    spatial_loc: np.ndarray
-    orientation: np.ndarray
+    stimulus_location: np.ndarray
+    stimulus_orientation: np.ndarray
+    stimulus_contrast: np.ndarray
+    stimulus_size: np.ndarray
 
 
 class NeuronArray1D:
@@ -41,20 +43,11 @@ class NeuronArray1D:
         self._neural_recf_loc = recf_loc
         self._neural_recf_width = recf_width
 
-    # def _get_response(orientation_tuning_loc: float, orientation_tuning_kappa: float):
-    #     return vonmises.pdf(
-    #         stimulus_ori, loc=orientation_tuning_loc, kappa=orientation_tuning_kappa
-    #     )
-    #
-    #
-    # neural_responses = [
-    #     _get_response(x, y) for x, y in zip(neuron_tuning_loc, neuron_tuning_kappa)
-    # ]
     def _get_res_amp(self, stimulus: Stimulus1D):
         return np.array(
             [
                 norm.pdf(
-                    stimulus.spatial_loc,
+                    stimulus.stimulus_location,
                     loc=loc,
                     scale=sc,
                 )
@@ -73,7 +66,7 @@ class NeuronArray1D:
         return np.array(
             [
                 vonmises.pdf(
-                    stimulus.orientation,
+                    stimulus.stimulus_orientation,
                     loc=x,
                     kappa=y,
                 )
@@ -99,8 +92,8 @@ class NeuronArray1D:
         return np.array(
             [
                 y
-                * np.cos(stimulus.orientation - x)
-                * vonmises.pdf(stimulus.orientation, loc=x, kappa=y)
+                * np.cos(stimulus.stimulus_orientation - x)
+                * vonmises.pdf(stimulus.stimulus_orientation, loc=x, kappa=y)
                 for x, y in zip(self._neural_tuning_loc, self._neural_tuning_kappa)
             ]
         ).T

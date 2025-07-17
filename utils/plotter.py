@@ -83,7 +83,6 @@ def plot_neural_orientation_tuning_profile(
 ): ...
 
 
-# plot neural tuning profile
 def plot_neural_orientation_tuning_profile(
     stimulus: Stimulus1D,
     neuron_tuning_loc: npt.NDArray[np.float64],
@@ -97,7 +96,7 @@ def plot_neural_orientation_tuning_profile(
     fig: Optional[Figure | SubFigure] = None,
 ):
     _ax = _get_ax(ax, fig)
-    probe_stim = np.sort(stimulus.orientation)
+    probe_stim = np.sort(stimulus.stimulus_orientation)
     num_lines = 1 + len(neuron_tuning_loc) // plot_every
     _center = num_lines // 2
     _cmap = mpl.colormaps[cmap]
@@ -125,7 +124,7 @@ def plot_neural_orientation_tuning_profile(
         alpha=1,
         c=_colors[_center],
     )
-    _ax.set_title("Neural Tuning Function")
+    _ax.set_title("Neural Tuning Function", wrap=True)
     _ax.set_xlabel("Orientation")
     _ax.set_xticks(
         [-np.pi, -np.pi / 2, 0, np.pi / 2, np.pi],
@@ -190,7 +189,7 @@ def plot_orientation_activation(
     _ax.imshow(neural_responses_sorted, cmap=cmap)
     _ax.set_xlabel(xlabel)
     _ax.set_ylabel(ylabel)
-    _ax.set_title(title)
+    _ax.set_title(title, wrap=True)
     if (ax is None) and (fig is None):
         plt.show()
 
@@ -235,11 +234,14 @@ def plot_orientation_fisher_information(
     _ax = _get_ax(ax, fig)
     if colored_by_spatial_loc:
         _ax.scatter(
-            stimulus.orientation, fisher_info, c=stimulus.spatial_loc, cmap=cmap
+            stimulus.stimulus_orientation,
+            fisher_info,
+            c=stimulus.stimulus_location,
+            cmap=cmap,
         )
     else:
-        _ax.scatter(stimulus.orientation, fisher_info)
-    _ax.set_title("Fisher Information $J(\\theta)$")
+        _ax.scatter(stimulus.stimulus_orientation, fisher_info)
+    _ax.set_title("Fisher Information $J(\\theta)$", wrap=True)
     _ax.set_xlabel("Orientation")
     _ax.set_xticks(
         [-np.pi, -np.pi / 2, 0, np.pi / 2, np.pi],
@@ -261,6 +263,8 @@ def plot_mds(
     xlabel: str = "Dimension 1",
     ylabel: str = "Dimension 2",
     zlabel: str = "Dimension 3",
+    grid: bool = True,
+    show_axis: bool = True,
     title: str = "MDS Embedding of the neural responses (3D)",
 ): ...
 
@@ -276,6 +280,8 @@ def plot_mds(
     xlabel: str = "Dimension 1",
     ylabel: str = "Dimension 2",
     zlabel: str = "Dimension 3",
+    grid: bool = True,
+    show_axis: bool = True,
     title: str = "MDS Embedding of the neural responses (3D)",
     ax: Axes | Axes3D,
 ): ...
@@ -292,6 +298,8 @@ def plot_mds(
     xlabel: str = "Dimension 1",
     ylabel: str = "Dimension 2",
     zlabel: str = "Dimension 3",
+    grid: bool = True,
+    show_axis: bool = True,
     title: str = "MDS Embedding of the neural responses (3D)",
     fig: Figure | SubFigure,
 ): ...
@@ -308,6 +316,8 @@ def plot_mds(
     ylabel: str = "Dimension 2",
     zlabel: str = "Dimension 3",
     title: str = "MDS Embedding of the neural responses (3D)",
+    grid: bool = True,
+    show_axis: bool = True,
     ax: Optional[Axes | Axes3D] = None,
     fig: Optional[Figure | SubFigure] = None,
 ):
@@ -348,7 +358,10 @@ def plot_mds(
     _ax.set_ylabel(ylabel)
     if dim == 3:
         _ax.set_zlabel(zlabel)
-    _ax.set_title(title)
+    _ax.set_title(title, wrap=True)
+    _ax.grid(grid)
+    if not show_axis:
+        _ax.set_axis_off()
     if (ax is None) and (fig is None):
         plt.show()
 
@@ -461,7 +474,7 @@ def plot_representational_distance(
     _ax.scatter(stim_dist, rep_dist, alpha=alpha, c=c)
     _ax.set_xlabel(xlabel)
     _ax.set_ylabel(ylabel)
-    _ax.set_title(title)
+    _ax.set_title(title, wrap=True)
     if (ax is None) and (fig is None):
         plt.show()
 
@@ -504,6 +517,6 @@ def plot_pca_scree(
     pca.fit(neural_responses)
     var = pca.explained_variance_ratio_
     _ax.scatter(np.arange(dim) + 1, var[:dim])
-    _ax.set_title(title)
+    _ax.set_title(title, wrap=True)
     if (ax is None) and (fig is None):
         plt.show()
