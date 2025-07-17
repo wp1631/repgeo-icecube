@@ -15,6 +15,7 @@ from utils.plotter import (
 from utils.statistical_sampling import create_voxel_sampling
 from utils.iem import IEM1D
 import matplotlib.pyplot as plt
+from utils.rep_metrics import global_distance_variance, global_neigbor_dice, linear_CKA
 
 # ============Define Parameters==============
 NR_NUM = 3000
@@ -23,10 +24,10 @@ NR_NUM = 3000
 NR_OT_LOC_MIN = -np.pi  # Neuron minimum orientation tuning location
 NR_OT_LOC_MAX = np.pi
 NR_OT_KAPPA = 5
-NR_LOC_W = 0.03
+NR_LOC_W = 1000
 
 # Stimulus sample
-ST_NUM = 1000
+ST_NUM = 500
 ST_OR_MIN = -np.pi  # stimulus.stimulus_orientation
 ST_OR_MAX = np.pi
 ST_LOC_MIN = -3
@@ -73,10 +74,7 @@ neuron_arr = NeuronArray1D(
 
 
 # ============Visualization==============
-# plot neural tuning profile
-plot_neural_orientation_tuning_profile(
-    stimulus, neuron_tuning_loc, neuron_tuning_kappa, neuron_tuning_amp, plot_every=100
-)
+
 
 # get neural responses
 neural_responses = neuron_arr.get_responses(stimulus)
@@ -85,21 +83,73 @@ neural_responses = np.array(neural_responses).T
 deriv = neuron_arr.get_derivatives(stimulus)
 deriv_normed = np.linalg.norm(deriv, axis=1)
 fisher_info = deriv_normed / np.sqrt(NR_NUM)
+sort_index = np.argsort(stimulus_ori)
 
-plot_orientation_activation(neural_responses, np.argsort(stimulus.stimulus_orientation))
+
+def plot_all():
+    neuron_fig = plt.figure(dpi=300)
+    neuron_subfigs = neuron_fig.subfigures(
+        1, 8, height_ratios=np.full(1, 1), width_ratios=np.full(8, 1)
+    )
+    plot_neural_orientation_tuning_profile(
+        stimulus,
+        neuron_tuning_loc,
+        neuron_tuning_kappa,
+        neuron_tuning_amp,
+        plot_every=100,
+        fig=neuron_subfigs[0],
+    )
+
+    plot_orientation_activation(
+        neural_responses,
+        np.argsort(stimulus.stimulus_orientation),
+        fig=neuron_subfigs[1],
+    )
+
+    plot_orientation_fisher_information(stimulus, fisher_info, fig=neuron_subfigs[2])
+
+    plot_mds(neural_responses, c=stimulus.stimulus_orientation, fig=neuron_subfigs[3])
+
+    plot_mds(
+        deriv,
+        c=stimulus.stimulus_orientation,
+        title="MDS Embedding of the Gradient (3D)",
+        fig=neuron_subfigs[4],
+    )
+
+    plot_RDM(neural_responses, sort_index, fig=neuron_subfigs[5])
+
+    plot_representational_distance(
+        stimulus.stimulus_orientation, neural_responses, fig=neuron_subfigs[6]
+    )
+
+    plot_pca_scree(neural_responses, fig=neuron_subfigs[7])
+
+    neuron_fig.show()
+
+
+plot_neural_orientation_tuning_profile(
+    stimulus,
+    neuron_tuning_loc,
+    neuron_tuning_kappa,
+    neuron_tuning_amp,
+    plot_every=100,
+)
+
+plot_orientation_activation(
+    neural_responses,
+    np.argsort(stimulus.stimulus_orientation),
+)
 
 plot_orientation_fisher_information(stimulus, fisher_info)
 
-# Plot MDS of the neural responses
 plot_mds(neural_responses, c=stimulus.stimulus_orientation)
 
-# Plot MDS of the orientation gradient
 plot_mds(
-    deriv, c=stimulus.stimulus_orientation, title="MDS Embedding of the Gradient (3D)"
+    deriv,
+    c=stimulus.stimulus_orientation,
+    title="MDS Embedding of the Gradient (3D)",
 )
-
-# Plot MDS of the location gradient
-sort_index = np.argsort(stimulus_ori)
 
 plot_RDM(neural_responses, sort_index)
 
@@ -107,16 +157,11 @@ plot_representational_distance(stimulus.stimulus_orientation, neural_responses)
 
 plot_pca_scree(neural_responses)
 
-
-# ============Measurement Simulation===============
-
-MEASUREMENT_GRID_SIZE = 0.05
+MEASUREMENT_GRID_SIZE = 0.1
 
 measurement = create_voxel_sampling(
     neural_responses, neuron_recf_loc, MEASUREMENT_GRID_SIZE
 )
-
-plot_RDM(measurement, sort_index)
 # ============Inverted Encoding Model==============
 
 ## Channel Responses
@@ -134,6 +179,19 @@ channel_arr = NeuronArray1D(
     recf_width=channel_recf_width,
 )
 channel_activation = channel_arr.get_responses(stimulus=stimulus).T
+
+plot_mds(
+    deriv,
+    c=stimulus.stimulus_orientation,
+    title="MDS Embedding of the Gradient (3D)",
+)
+plot_mds(
+    channel_activation,
+    c=stimulus.stimulus_orientation,
+    title="MDS Embedding of Channel Activation (3D)",
+)
+plot_RDM(channel_activation, sort_index)
+plot_pca_scree(channel_activation)
 
 iem_obj = IEM1D(channel_arr)
 iem_obj.fit(stimulus, measurement)
@@ -191,14 +249,18 @@ noisy_measurement = measurement + MEASUREMENT_NOISE_AMPLITUDE * base_measurement
 plot_mds(
     noisy_responses,
     c=stimulus.stimulus_orientation,
-    title="Noisy Neural Responses MDS (3D)",
+    title="MDS Embedding of Noisy Neural Responses (3D)",
 )
+plot_RDM(noisy_responses, sort_index)
+plot_pca_scree(noisy_responses)
 
 plot_mds(
     noisy_measurement,
     c=stimulus.stimulus_orientation,
-    title="Noisy Measurement Responses MDS (3D)",
+    title="MDS Embedding of Noisy Measurement (3D)",
 )
+plot_RDM(noisy_measurement, sort_index)
+plot_pca_scree(noisy_measurement)
 
 noisy_iem = IEM1D(channel_arr)
 noisy_iem.fit(stimulus, noisy_measurement)
@@ -206,10 +268,12 @@ noisy_iem.fit(stimulus, noisy_measurement)
 noisy_reconstruct_channel = noisy_iem.decode(noisy_measurement)
 
 plot_mds(
-    noisy_measurement,
+    noisy_reconstruct_channel,
     c=stimulus.stimulus_orientation,
     title="Noisy Reconstructed MDS (3D)",
 )
+plot_RDM(noisy_reconstruct_channel, sort_index)
+plot_pca_scree(noisy_reconstruct_channel)
 # ================Covariate Noise==================
 
 spatial_block_noise_response = neural_responses.copy()
@@ -217,34 +281,42 @@ spatial_block_noise_response[:, np.argsort(neuron_recf_loc)] += create_block_noi
     block_size=200, total_size=NR_NUM, observation=ST_NUM
 )
 
-recf_block_noise_fig = plt.figure()
-recf_block_noise_subfigs = recf_block_noise_fig.subfigures(1, 2)
-recf_block_noise_rdm_ax = recf_block_noise_subfigs[0].add_subplot((111))
-
+plot_mds(
+    spatial_block_noise_response,
+    c=stimulus.stimulus_orientation,
+    title="MDS Embedding of Block Noisy Neural Responses (3D)",
+)
 plot_RDM(
     spatial_block_noise_response,
     sort_index,
-    ax=recf_block_noise_rdm_ax,
 )
+plot_pca_scree(spatial_block_noise_response)
 
-recf_block_noise_mds_ax = recf_block_noise_subfigs[1].add_subplot(
-    (111), projection="3d", xmargin=0.7
+recf_block_noise_measure = create_voxel_sampling(
+    spatial_block_noise_response, neuron_recf_loc, MEASUREMENT_GRID_SIZE
 )
 plot_mds(
-    spatial_block_noise_response,
+    recf_block_noise_measure,
     c=stimulus.stimulus_orientation,
-    title="Receptive Field Block Noise Neural Responses MDS (3D)",
-    ax=recf_block_noise_mds_ax,
+    title="MDS Embedding of Block Noisy Measurement (3D)",
 )
-
-plt.show()
+plot_RDM(
+    recf_block_noise_measure,
+    sort_index,
+)
+plot_pca_scree(recf_block_noise_measure)
 
 block_noise_iem = IEM1D(channel_arr)
 block_noise_iem.fit(stimulus, noisy_measurement)
-block_noisy_channel = block_noise_iem.decode(noisy_measurement)
+block_noisy_channel_recon = block_noise_iem.decode(noisy_measurement)
 
 plot_mds(
-    block_noisy_channel,
+    block_noisy_channel_recon,
     c=stimulus.stimulus_orientation,
-    title="Receptive Field Block Noise Reconstruction MDS (3D)",
+    title="MDS Embedding of Block Noisy Channel Reconstruction (3D)",
 )
+plot_RDM(
+    block_noisy_channel_recon,
+    sort_index,
+)
+plot_pca_scree(block_noisy_channel_recon)

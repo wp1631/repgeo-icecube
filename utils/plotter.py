@@ -14,6 +14,9 @@ from typing import overload
 from matplotlib.figure import Figure, SubFigure
 import numpy.typing as npt
 
+plt.rcParams["figure.figsize"] = [10.0, 10.0]
+plt.rcParams["figure.dpi"] = 200
+
 
 def get_max_vonmises(kappa: float | int):
     return np.exp(kappa) / (2 * np.pi * i0(kappa))
@@ -96,6 +99,7 @@ def plot_neural_orientation_tuning_profile(
     fig: Optional[Figure | SubFigure] = None,
 ):
     _ax = _get_ax(ax, fig)
+    _ax.set_box_aspect(1)
     probe_stim = np.sort(stimulus.stimulus_orientation)
     num_lines = 1 + len(neuron_tuning_loc) // plot_every
     _center = num_lines // 2
@@ -130,6 +134,7 @@ def plot_neural_orientation_tuning_profile(
         [-np.pi, -np.pi / 2, 0, np.pi / 2, np.pi],
         ["$-\pi /2$", "$-\pi /4$", "0", "$\pi/4$", "$\pi/2$"],
     )
+    _ax.set_xlim(-np.pi, np.pi)
     _ax.set_ylim(
         0, np.max(get_max_vonmises(np.max(neuron_tuning_kappa[::plot_every])) * 1.1)
     )
@@ -173,6 +178,8 @@ def plot_orientation_activation(
     ylabel: str = "stimulus",
     title: str = "Neural Activation vs Stimulus",
 ): ...
+
+
 def plot_orientation_activation(
     neural_responses: npt.NDArray[np.floating[Any]],
     sort_index: npt.NDArray[np.int64],
@@ -185,11 +192,17 @@ def plot_orientation_activation(
     fig: Optional[Figure | SubFigure] = None,
 ):
     _ax = _get_ax(ax, fig)
+    _ax.set_box_aspect(1)
     neural_responses_sorted = neural_responses[sort_index]
-    _ax.imshow(neural_responses_sorted, cmap=cmap)
+    _ax.imshow(neural_responses_sorted, aspect="auto", cmap=cmap, origin="lower")
     _ax.set_xlabel(xlabel)
     _ax.set_ylabel(ylabel)
     _ax.set_title(title, wrap=True)
+    l = len(neural_responses)
+    _ax.set_yticks(
+        [0, l / 4, l / 2, 3 * l / 4, l],
+        ["$-\pi /2$", "$-\pi /4$", "0", "$\pi/4$", "$\pi/2$"],
+    )
     if (ax is None) and (fig is None):
         plt.show()
 
@@ -232,6 +245,7 @@ def plot_orientation_fisher_information(
     fig: Optional[Figure | SubFigure] = None,
 ):
     _ax = _get_ax(ax, fig)
+    _ax.set_box_aspect(1)
     if colored_by_spatial_loc:
         _ax.scatter(
             stimulus.stimulus_orientation,
@@ -323,13 +337,14 @@ def plot_mds(
 ):
     if dim == 3:
         _ax = _get_ax(ax, fig, projection="3d")
+        _ax.set_box_aspect((1, 1, 1))
     elif dim == 2:
         _ax = _get_ax(ax, fig)
+        _ax.set_box_aspect(1)
     else:
         raise NotImplementedError(
             "Dimension for plot is not correct; need to be 2 or 3"
         )
-
     embedding = MDS(n_components=dim)
     _transformed = cast(npt.NDArray[np.floating[Any]], embedding.fit_transform(data))
     if dim == 2:
@@ -400,12 +415,13 @@ def plot_RDM(
     fig: Optional[Figure | SubFigure] = None,
 ):
     _ax = _get_ax(ax, fig)
+    _ax.set_box_aspect(1)
     neural_responses_sorted = neural_responses[sort_index]
 
     p_dist = pdist(neural_responses_sorted)
     dist_mat = squareform(p_dist)
 
-    _ax.imshow(dist_mat, cmap=cmap)
+    _ax.imshow(dist_mat, aspect="auto", cmap=cmap)
     if (ax is None) and (fig is None):
         plt.show()
 
@@ -464,6 +480,7 @@ def plot_representational_distance(
     fig: Optional[Figure | SubFigure] = None,
 ):
     _ax = _get_ax(ax, fig)
+    _ax.set_box_aspect(1)
     if c:
         assert len(c) == len(stimulus_value)
     sort_index = np.argsort(stimulus_value)
@@ -513,10 +530,12 @@ def plot_pca_scree(
     fig: Optional[Figure | SubFigure] = None,
 ):
     _ax = _get_ax(ax, fig)
+    _ax.set_box_aspect(1)
     pca = PCA()
     pca.fit(neural_responses)
     var = pca.explained_variance_ratio_
     _ax.scatter(np.arange(dim) + 1, var[:dim])
     _ax.set_title(title, wrap=True)
+    _ax.set_ylim(0, 0.7)
     if (ax is None) and (fig is None):
         plt.show()
