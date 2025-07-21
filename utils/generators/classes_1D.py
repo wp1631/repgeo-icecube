@@ -56,7 +56,6 @@ class NeuronArray1D:
         ).T
 
     def get_response_amplitude(self, stimulus: Stimulus1D) -> np.ndarray:
-        ic(self._get_res_amp(stimulus))
         return np.dot(
             self._get_res_amp(stimulus),
             self._neural_tuning_amplitude.reshape(-1, 1),

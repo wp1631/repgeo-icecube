@@ -66,7 +66,7 @@ def global_neigbor_dice(
     Y: npt.NDArray[np.floating],
     *,
     sort_index: Optional[npt.NDArray] = None,
-    dist_ratio_threshold: float = 0.1,
+    dist_ratio_threshold: float = 0.2,
 ):
     assert len(X) == len(Y)
     l = len(X)

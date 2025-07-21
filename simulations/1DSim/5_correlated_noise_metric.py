@@ -61,10 +61,6 @@ neuron_arr = NeuronArray1D(
     neuron_recf_width,
 )
 
-
-# ============Visualization==============
-
-
 # get neural responses
 neural_responses = neuron_arr.get_responses(stimulus)
 neural_responses = np.array(neural_responses).T
@@ -127,7 +123,6 @@ noisy_iem.fit(stimulus, noisy_measurement)
 noisy_reconstruct_channel = noisy_iem.decode(noisy_measurement)
 
 # ================Covariate Noise==================
-
 spatial_block_noise_response = neural_responses.copy()
 spatial_block_noise_response[:, np.argsort(neuron_recf_loc)] += create_block_noise(
     block_size=200, total_size=NR_NUM, observation=ST_NUM
@@ -136,6 +131,7 @@ block_noise_iem = IEM1D(channel_arr)
 block_noise_iem.fit(stimulus, noisy_measurement)
 block_noisy_channel = block_noise_iem.decode(noisy_measurement)
 diff = block_noisy_channel - channel_activation
+
 ic("measurement vs Neurons")
 ic(np.mean(global_neigbor_dice(measurement, spatial_block_noise_response)))
 ic(linear_CKA(measurement, neural_responses))
