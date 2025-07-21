@@ -29,33 +29,29 @@ rn_mnd_list = []
 rc_mnd_list = []
 nc_mnd_list = []
 
+# Neuron Orientation Tuning
+NR_NUM = 3000
+NR_OT_LOC_MIN = -np.pi  # Neuron minimum orientation tuning location
+NR_OT_LOC_MAX = np.pi
+NR_OT_KAPPA = 5
+NR_LOC_W = 0.03
+
+# Stimulus sample
+ST_NUM = 1000
+ST_OR_MIN = -np.pi  # stimulus.stimulus_orientation
+ST_OR_MAX = np.pi
+ST_LOC_MIN = -3
+ST_LOC_MAX = 3
+
+# Channel paraneters
+CH_NUM = 12
+CH_OR_LOC_MIN = -np.pi
+CH_OR_LOC_MAX = np.pi
+CH_OR_KAPPA = 3
+CH_RECF_WIDTH = 1
+CH_RECF_MIN = -3
+CH_RECF_MAX = 3
 for i in range(TOTAL_SIMULATION):
-    # ============Define Parameters==============
-    NR_NUM = 3000
-
-    # Neuron Orientation Tuning
-    NR_OT_LOC_MIN = -np.pi  # Neuron minimum orientation tuning location
-    NR_OT_LOC_MAX = np.pi
-    NR_OT_KAPPA = 10
-    NR_LOC_W = 100
-
-    # Stimulus sample
-    ST_NUM = 500
-    ST_OR_MIN = -np.pi  # stimulus.stimulus_orientation
-    ST_OR_MAX = np.pi
-    ST_LOC_MIN = -3
-    ST_LOC_MAX = 3
-
-    # Channel parameters
-    CH_NUM = 6
-    CH_OR_LOC_MIN = -np.pi
-    CH_OR_LOC_MAX = np.pi
-    CH_OR_KAPPA = 3
-    CH_RECF_WIDTH = 100
-    CH_RECF_MIN = -3
-    CH_RECF_MAX = 3
-    # ============Data Generation==============
-
     # initialize the neuron values
     stimulus_ori = np.random.uniform(ST_OR_MIN, ST_OR_MAX, ST_NUM)
     stimulus_loc = np.random.uniform(ST_LOC_MIN, ST_LOC_MAX, ST_NUM)
@@ -144,7 +140,11 @@ for i in range(TOTAL_SIMULATION):
     # ================Covariate Noise==================
     spatial_block_noise_response = neural_responses.copy()
     spatial_block_noise_response[:, np.argsort(neuron_recf_loc)] += create_block_noise(
-        block_size=200, total_size=NR_NUM, observation=ST_NUM
+        block_size=200,
+        total_size=NR_NUM,
+        observation=ST_NUM,
+        amplitude=0.2,
+        minor_amp=0.1,
     )
 
     block_noise_measurment = create_voxel_sampling(
@@ -156,19 +156,6 @@ for i in range(TOTAL_SIMULATION):
     block_noisy_channel = block_noise_iem.decode(block_noise_measurment)
     diff = block_noisy_channel - channel_activation
 
-    # ic("measurement vs Neurons")
-    # ic(np.mean(global_neigbor_dice(measurement, spatial_block_noise_response)))
-    # ic(linear_CKA(measurement, neural_responses))
-    # ic(global_distance_variance(measurement, spatial_block_noise_response))
-    # ic("Recon vs Channel")
-    # ic(np.mean(global_neigbor_dice(block_noisy_channel, channel_activation)))
-    # ic(linear_CKA(block_noisy_channel, channel_activation))
-    # ic(global_distance_variance(block_noisy_channel, channel_activation))
-    # ic("Recon vs Neurons")
-    # ic(np.mean(global_neigbor_dice(block_noisy_channel, spatial_block_noise_response)))
-    # ic(linear_CKA(block_noisy_channel, neural_responses))
-    # ic(global_distance_variance(block_noisy_channel, spatial_block_noise_response))
-
     def get_three_metrics(X, Y):
         return (
             linear_CKA(X, Y),
@@ -176,11 +163,17 @@ for i in range(TOTAL_SIMULATION):
             global_distance_variance(X, Y),
         )
 
-    # measure vs recon (mr)
-    _ = get_three_metrics(block_noise_measurment, block_noisy_channel)
-    mr_lcka_list.append(_[0])
-    mr_mnd_list.append(_[1])
-    mr_mgd_list.append(_[2])
+    # channel vs recon (cr)
+    _ = get_three_metrics(channel_activation, block_noisy_channel)
+    rc_lcka_list.append(_[0])
+    rc_mnd_list.append(_[1])
+    rc_mgd_list.append(_[2])
+
+    # channel vs neuron (cn)
+    _ = get_three_metrics(channel_activation, spatial_block_noise_response)
+    nc_lcka_list.append(_[0])
+    nc_mnd_list.append(_[1])
+    nc_mgd_list.append(_[2])
 
     # recon vs neuron (rn)
     _ = get_three_metrics(block_noisy_channel, spatial_block_noise_response)
@@ -194,7 +187,13 @@ for i in range(TOTAL_SIMULATION):
     mc_mnd_list.append(_[1])
     mc_mgd_list.append(_[2])
 
-    # measurement vs neuron
+    # measure vs recon (mr)
+    _ = get_three_metrics(block_noise_measurment, block_noisy_channel)
+    mr_lcka_list.append(_[0])
+    mr_mnd_list.append(_[1])
+    mr_mgd_list.append(_[2])
+
+    # measurement vs neuron (mn)
     _ = get_three_metrics(block_noise_measurment, spatial_block_noise_response)
     mn_lcka_list.append(_[0])
     mn_mnd_list.append(_[1])
@@ -203,16 +202,58 @@ for i in range(TOTAL_SIMULATION):
 import matplotlib.pyplot as plt
 
 ax = plt.subplot()
-for item in zip(rn_lcka_list, mr_lcka_list, mc_lcka_list, mn_lcka_list):
-    ax.plot(item)
+for item in zip(
+    rc_lcka_list, nc_lcka_list, rn_lcka_list, mc_lcka_list, mr_lcka_list, mn_lcka_list
+):
+    ax.plot(item, alpha=0.3)
+plt.title("CKA")
+plt.xticks(
+    [0, 1, 2, 3, 4, 5],
+    [
+        "recon/channel",
+        "channel/neuron",
+        "recon/neuron",
+        "measure/channel",
+        "measure_recon",
+        "measure/neuron",
+    ],
+)
 plt.show()
 ax = plt.subplot()
-for item in zip(rn_mnd_list, mr_mnd_list, mc_mnd_list, mn_mnd_list):
-    ax.plot(item)
+for item in zip(
+    rc_mnd_list, nc_mnd_list, rn_mnd_list, mc_mnd_list, mr_mnd_list, mn_mnd_list
+):
+    ax.plot(item, alpha=0.3)
+plt.title("Mean neighbor dice")
+plt.xticks(
+    [0, 1, 2, 3, 4, 5],
+    [
+        "recon/channel",
+        "channel/neuron",
+        "recon/neuron",
+        "measure/channel",
+        "measure_recon",
+        "measure/neuron",
+    ],
+)
 plt.show()
 ax = plt.subplot()
-for item in zip(rn_mgd_list, mr_mgd_list, mc_mgd_list, mn_mgd_list):
-    ax.plot(item)
+for item in zip(
+    rc_mgd_list, nc_mgd_list, rn_mgd_list, mc_mgd_list, mr_mgd_list, mn_mgd_list
+):
+    ax.plot(item, alpha=0.3)
+plt.title("Mean global displacement")
+plt.xticks(
+    [0, 1, 2, 3, 4, 5],
+    [
+        "recon/channel",
+        "channel/neuron",
+        "recon/neuron",
+        "measure/channel",
+        "measure_recon",
+        "measure/neuron",
+    ],
+)
 plt.show()
 # # cka
 #     mr_lcka_list = []
