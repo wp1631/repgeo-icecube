@@ -1,5 +1,6 @@
 from typing import Tuple
 import numpy as np
+from itertools import product
 from utils.generators.classes_1D import NeuronArray1D, Stimulus1D
 from utils.generators.noise import create_block_noise
 from utils.statistical_sampling import create_voxel_sampling
@@ -36,7 +37,6 @@ BLOCK_NEURONAL_MINOR_NOISE_AMPLITUDE = 0.1
 MEASUREMENT_NOISE_AMPLITUDE = 0.1
 
 REPEAT_NUM = 100
-
 # Varying parameters
 ## Neuron
 SP_NR_NUM = np.logspace(1, 6, num=10, endpoint=True, dtype=np.int64)
@@ -56,6 +56,19 @@ SP_BLOCK_NEURON_SIZE = np.logspace(0, 5, endpoint=True, base=10, num=10, dtype=n
 SP_BLOCK_NOISE_MINOR_AMP = np.logspace(-2, 2, endpoint=True, base=10, num=5)
 SP_MEASUREMNET_NOISE_AMP = np.logspace(-2, 2, endpoint=True, base=10, num=5)
 
+# parameter space
+NR_NUM_L = []
+NR_OT_KAPPA_L = []
+NR_RECF_W_L = []
+
+CH_NUM_L = []
+CH_OT_KP_L = []
+CH_RECF_W_L = []
+
+BLOCK_NOISE_AMP_L = []
+BLOCK_NEURON_SIZE_L = []
+BLOCK_NEURON_MINOR_AMP_L = []
+MEASURE_NOISE_AMP_L = []
 
 # cka
 mr_lcka_list = []
@@ -93,8 +106,6 @@ def generate_metrics(
     NR_OT_KAPPA=5,
     NR_LOC_W=0.03,
     ST_NUM=1000,
-    ST_OR_MIN=-np.pi,  # stimulus.stimulus_orientation
-    ST_OR_MAX=np.pi,
     CH_NUM=12,
     CH_OR_KAPPA=3,
     CH_RECF_WIDTH=1,
@@ -106,7 +117,6 @@ def generate_metrics(
     BLOCK_NEURONAL_MINOR_NOISE_AMPLITUDE=0.1,
     MEASUREMENT_NOISE_AMPLITUDE=0.1,
 ):
-    # for i in range(REPEAT_NUM):
     # initialize the neuron values
     stimulus_ori = np.random.uniform(ST_OR_MIN, ST_OR_MAX, ST_NUM)
     stimulus_loc = np.random.uniform(ST_LOC_MIN, ST_LOC_MAX, ST_NUM)
@@ -136,6 +146,7 @@ def generate_metrics(
     # get neural responses
     neural_responses = neuron_arr.get_responses(stimulus)
     neural_responses = np.array(neural_responses).T
+
     # ============Inverted Encoding Model==============
     ## Channel Responses
     channel_tuning_loc = np.linspace(CH_OR_LOC_MIN, CH_OR_LOC_MAX, CH_NUM)
@@ -210,6 +221,34 @@ def generate_metrics(
     mn_mnd_list.append(_[1])
     mn_mgd_list.append(_[2])
 
+
+if __name__ == "__main__":
+    for (
+        NR_NUM,
+        NR_OT_KAPPA,
+        NR_RECF_W,
+        CH_NUM,
+        CH_OT_KAPPA,
+        CH_RECF_W,
+        MEASUREMNT_GRID_SIZE,
+        BLOCK_NOISE_AMP,
+        BLOCK_NEURON_SIZE,
+        BLOCK_NOISE_MINOR_AMP,
+        MEASURE_NOISE_AMP,
+    ) in product(
+        SP_NR_NUM,
+        SP_NR_OT_KAPPA,
+        SP_NR_RECF_W,
+        SP_CH_NUM,
+        SP_CH_OT_KAPPA,
+        SP_CH_RECF_W,
+        SP_MEASUREMENT_GRID_SIZE,
+        SP_BLOCK_NOISE_AMP,
+        SP_BLOCK_NEURON_SIZE,
+        SP_BLOCK_NOISE_MINOR_AMP,
+        SP_MEASUREMNET_NOISE_AMP,
+    ):
+        pass
 
 # import matplotlib.pyplot as plt
 
