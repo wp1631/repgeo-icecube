@@ -8,11 +8,8 @@ from utils.iem import IEM1D
 from utils.rep_metrics import global_distance_variance, global_neigbor_dice, linear_CKA
 
 # Neuron Orientation Tuning
-NR_NUM = 3000
 NR_OT_LOC_MIN = -np.pi  # Neuron minimum orientation tuning location
 NR_OT_LOC_MAX = np.pi
-NR_OT_KAPPA = 5
-NR_LOC_W = 0.03
 
 # Stimulus sample
 ST_NUM = 1000
@@ -22,20 +19,12 @@ ST_LOC_MIN = -3
 ST_LOC_MAX = 3
 
 # Channel paraneters
-CH_NUM = 12
 CH_OR_LOC_MIN = -np.pi
 CH_OR_LOC_MAX = np.pi
-CH_OR_KAPPA = 3
-CH_RECF_WIDTH = 1
 CH_RECF_MIN = -3
 CH_RECF_MAX = 3
 
 # Measurement
-MEASUREMENT_GRID_SIZE = 0.05
-BLOCK_NEURONAL_NOISE_AMPLITUDE = 0.05
-BLOCK_NEURONAL_MINOR_NOISE_AMPLITUDE = 0.1
-MEASUREMENT_NOISE_AMPLITUDE = 0.1
-
 REPEAT_NUM = 100
 # Varying parameters
 ## Neuron
@@ -54,43 +43,7 @@ SP_MEASUREMENT_GRID_SIZE = np.linspace(
 SP_BLOCK_NOISE_AMP = np.logspace(-2, 2, endpoint=True, base=10, num=5)
 SP_BLOCK_NEURON_SIZE = np.logspace(0, 5, endpoint=True, base=10, num=10, dtype=np.int64)
 SP_BLOCK_NOISE_MINOR_AMP = np.logspace(-2, 2, endpoint=True, base=10, num=5)
-SP_MEASUREMNET_NOISE_AMP = np.logspace(-2, 2, endpoint=True, base=10, num=5)
-
-# parameter space
-NR_NUM_L = []
-NR_OT_KAPPA_L = []
-NR_RECF_W_L = []
-
-CH_NUM_L = []
-CH_OT_KP_L = []
-CH_RECF_W_L = []
-
-BLOCK_NOISE_AMP_L = []
-BLOCK_NEURON_SIZE_L = []
-BLOCK_NEURON_MINOR_AMP_L = []
-MEASURE_NOISE_AMP_L = []
-
-# cka
-mr_lcka_list = []
-mn_lcka_list = []
-mc_lcka_list = []
-rn_lcka_list = []
-rc_lcka_list = []
-nc_lcka_list = []
-# mean global displacement
-mr_mgd_list = []
-mn_mgd_list = []
-mc_mgd_list = []
-rn_mgd_list = []
-rc_mgd_list = []
-nc_mgd_list = []
-# mean neighbor dice index
-mr_mnd_list = []
-mn_mnd_list = []
-mc_mnd_list = []
-rn_mnd_list = []
-rc_mnd_list = []
-nc_mnd_list = []
+SP_MEASUREMENT_NOISE_AMP = np.logspace(-2, 2, endpoint=True, base=10, num=5)
 
 
 def get_three_metrics(X: np.ndarray, Y: np.ndarray) -> Tuple:
@@ -185,44 +138,60 @@ def generate_metrics(
     block_noise_iem.fit(stimulus, block_noise_measurment)
     block_noisy_channel = block_noise_iem.decode(block_noise_measurment)
 
+    all_res = []
+
     # channel vs recon (cr)
     _ = get_three_metrics(channel_activation, block_noisy_channel)
-    rc_lcka_list.append(_[0])
-    rc_mnd_list.append(_[1])
-    rc_mgd_list.append(_[2])
+    all_res.append(_[0])
+    all_res.append(_[1])
+    all_res.append(_[2])
 
     # channel vs neuron (cn)
     _ = get_three_metrics(channel_activation, spatial_block_noise_response)
-    nc_lcka_list.append(_[0])
-    nc_mnd_list.append(_[1])
-    nc_mgd_list.append(_[2])
+    all_res.append(_[0])
+    all_res.append(_[1])
+    all_res.append(_[2])
 
     # recon vs neuron (rn)
     _ = get_three_metrics(block_noisy_channel, spatial_block_noise_response)
-    rn_lcka_list.append(_[0])
-    rn_mnd_list.append(_[1])
-    rn_mgd_list.append(_[2])
+    all_res.append(_[0])
+    all_res.append(_[1])
+    all_res.append(_[2])
 
     # measure vs channel (mc)
     _ = get_three_metrics(block_noise_measurment, channel_activation)
-    mc_lcka_list.append(_[0])
-    mc_mnd_list.append(_[1])
-    mc_mgd_list.append(_[2])
+    all_res.append(_[0])
+    all_res.append(_[1])
+    all_res.append(_[2])
 
     # measure vs recon (mr)
     _ = get_three_metrics(block_noise_measurment, block_noisy_channel)
-    mr_lcka_list.append(_[0])
-    mr_mnd_list.append(_[1])
-    mr_mgd_list.append(_[2])
+    all_res.append(_[0])
+    all_res.append(_[1])
+    all_res.append(_[2])
 
     # measurement vs neuron (mn)
     _ = get_three_metrics(block_noise_measurment, spatial_block_noise_response)
-    mn_lcka_list.append(_[0])
-    mn_mnd_list.append(_[1])
-    mn_mgd_list.append(_[2])
+    all_res.append(_[0])
+    all_res.append(_[1])
+    all_res.append(_[2])
+
+    return all_res
+
+
+from io import TextIOWrapper
+
+
+def write_values(file: TextIOWrapper, *args, auto_close: bool = False):
+    file.write(f"{','.join(map(str, args))}")
+    file.write("\n")
+    if auto_close:
+        file.close()
 
 
 if __name__ == "__main__":
+    param_file = open("param_file.txt", "w")
+    result_file = open("metrics_file.txt", "w")
     for (
         NR_NUM,
         NR_OT_KAPPA,
@@ -230,11 +199,12 @@ if __name__ == "__main__":
         CH_NUM,
         CH_OT_KAPPA,
         CH_RECF_W,
-        MEASUREMNT_GRID_SIZE,
+        MEASUREMENT_GRID_SIZE,
         BLOCK_NOISE_AMP,
         BLOCK_NEURON_SIZE,
         BLOCK_NOISE_MINOR_AMP,
         MEASURE_NOISE_AMP,
+        REP,
     ) in product(
         SP_NR_NUM,
         SP_NR_OT_KAPPA,
@@ -246,84 +216,42 @@ if __name__ == "__main__":
         SP_BLOCK_NOISE_AMP,
         SP_BLOCK_NEURON_SIZE,
         SP_BLOCK_NOISE_MINOR_AMP,
-        SP_MEASUREMNET_NOISE_AMP,
+        SP_MEASUREMENT_NOISE_AMP,
+        np.arange(REPEAT_NUM) + 1,
     ):
-        pass
-
-# import matplotlib.pyplot as plt
-
-# ax = plt.subplot()
-# for item in zip(
-#     rc_lcka_list, nc_lcka_list, rn_lcka_list, mc_lcka_list, mr_lcka_list, mn_lcka_list
-# ):
-#     ax.plot(item, alpha=0.3)
-# plt.title("CKA")
-# plt.xticks(
-#     [0, 1, 2, 3, 4, 5],
-#     [
-#         "recon/channel",
-#         "channel/neuron",
-#         "recon/neuron",
-#         "measure/channel",
-#         "measure_recon",
-#         "measure/neuron",
-#     ],
-# )
-# plt.show()
-# ax = plt.subplot()
-# for item in zip(
-#     rc_mnd_list, nc_mnd_list, rn_mnd_list, mc_mnd_list, mr_mnd_list, mn_mnd_list
-# ):
-#     ax.plot(item, alpha=0.3)
-# plt.title("Mean neighbor dice")
-# plt.xticks(
-#     [0, 1, 2, 3, 4, 5],
-#     [
-#         "recon/channel",
-#         "channel/neuron",
-#         "recon/neuron",
-#         "measure/channel",
-#         "measure_recon",
-#         "measure/neuron",
-#     ],
-# )
-# plt.show()
-# ax = plt.subplot()
-# for item in zip(
-#     rc_mgd_list, nc_mgd_list, rn_mgd_list, mc_mgd_list, mr_mgd_list, mn_mgd_list
-# ):
-#     ax.plot(item, alpha=0.3)
-# plt.title("Mean global displacement")
-# plt.xticks(
-#     [0, 1, 2, 3, 4, 5],
-#     [
-#         "recon/channel",
-#         "channel/neuron",
-#         "recon/neuron",
-#         "measure/channel",
-#         "measure_recon",
-#         "measure/neuron",
-#     ],
-# )
-# plt.show()
-# # cka
-#     mr_lcka_list = []
-#     mn_lcka_list = []
-#     mc_lcka_list = []
-#     rn_lcka_list = []
-#     rc_lcka_list = []
-#     nc_lcka_list = []
-# # mean global displacement
-#     mr_mgd_list = []
-#     mn_mgd_list = []
-#     mc_mgd_list = []
-#     rn_mgd_list = []
-#     rc_mgd_list = []
-#     nc_mgd_list = []
-# # mean neighbor dice index
-#     mr_mnd_list = []
-#     mn_mnd_list = []
-#     mc_mnd_list = []
-#     rn_mnd_list = []
-#     rc_mnd_list = []
-#     nc_mnd_list = []
+        # write parameters_file
+        write_values(
+            param_file,
+            NR_NUM,
+            NR_OT_KAPPA,
+            NR_RECF_W,
+            CH_NUM,
+            CH_OT_KAPPA,
+            CH_RECF_W,
+            MEASUREMENT_GRID_SIZE,
+            BLOCK_NOISE_AMP,
+            BLOCK_NEURON_SIZE,
+            BLOCK_NOISE_MINOR_AMP,
+            MEASURE_NOISE_AMP,
+            REP,
+        )
+        _res = generate_metrics(
+            NR_NUM,
+            NR_OT_KAPPA,
+            NR_RECF_W,
+            1000,  # number of stim
+            CH_NUM,
+            CH_OT_KAPPA,
+            CH_RECF_W,
+            CH_RECF_MIN,
+            CH_RECF_MAX,
+            MEASUREMENT_GRID_SIZE,
+            BLOCK_NOISE_AMP,
+            BLOCK_NEURON_SIZE,
+            BLOCK_NOISE_MINOR_AMP,
+            MEASURE_NOISE_AMP,
+        )
+        write_values(result_file, *_res)
+        break
+    param_file.close()
+    result_file.close()

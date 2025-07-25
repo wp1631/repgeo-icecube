@@ -1,5 +1,4 @@
 import numpy as np
-from icecream import ic
 from utils.generators.classes_1D import NeuronArray1D, Stimulus1D
 from utils.generators.noise import create_block_noise
 from utils.statistical_sampling import create_voxel_sampling
