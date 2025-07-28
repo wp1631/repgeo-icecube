@@ -192,6 +192,7 @@ def write_values(file: TextIOWrapper, *args, auto_close: bool = False):
 if __name__ == "__main__":
     param_file = open("param_file.txt", "w")
     result_file = open("metrics_file.txt", "w")
+    err_file = open("err_file.txt", "w")
     for (
         NR_NUM,
         NR_OT_KAPPA,
@@ -254,6 +255,23 @@ if __name__ == "__main__":
                 REP,
             )
         except:
-            pass
+            write_values(
+                err_file,
+                NR_NUM,
+                NR_OT_KAPPA,
+                NR_RECF_W,
+                1000,  # number of stim
+                CH_NUM,
+                CH_OT_KAPPA,
+                CH_RECF_W,
+                CH_RECF_MIN,
+                CH_RECF_MAX,
+                MEASUREMENT_GRID_SIZE,
+                BLOCK_NOISE_AMP,
+                BLOCK_NEURON_SIZE,
+                BLOCK_NOISE_MINOR_AMP,
+                MEASURE_NOISE_AMP,
+            )
+    err_file.close()
     param_file.close()
     result_file.close()
