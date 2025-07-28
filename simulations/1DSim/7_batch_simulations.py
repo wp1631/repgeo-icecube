@@ -219,39 +219,41 @@ if __name__ == "__main__":
         SP_MEASUREMENT_NOISE_AMP,
         np.arange(REPEAT_NUM) + 1,
     ):
-        # write parameters_file
-        write_values(
-            param_file,
-            NR_NUM,
-            NR_OT_KAPPA,
-            NR_RECF_W,
-            CH_NUM,
-            CH_OT_KAPPA,
-            CH_RECF_W,
-            MEASUREMENT_GRID_SIZE,
-            BLOCK_NOISE_AMP,
-            BLOCK_NEURON_SIZE,
-            BLOCK_NOISE_MINOR_AMP,
-            MEASURE_NOISE_AMP,
-            REP,
-        )
-        _res = generate_metrics(
-            NR_NUM,
-            NR_OT_KAPPA,
-            NR_RECF_W,
-            1000,  # number of stim
-            CH_NUM,
-            CH_OT_KAPPA,
-            CH_RECF_W,
-            CH_RECF_MIN,
-            CH_RECF_MAX,
-            MEASUREMENT_GRID_SIZE,
-            BLOCK_NOISE_AMP,
-            BLOCK_NEURON_SIZE,
-            BLOCK_NOISE_MINOR_AMP,
-            MEASURE_NOISE_AMP,
-        )
-        write_values(result_file, *_res)
-        break
+        try:
+            # write parameters_file
+            _res = generate_metrics(
+                NR_NUM,
+                NR_OT_KAPPA,
+                NR_RECF_W,
+                1000,  # number of stim
+                CH_NUM,
+                CH_OT_KAPPA,
+                CH_RECF_W,
+                CH_RECF_MIN,
+                CH_RECF_MAX,
+                MEASUREMENT_GRID_SIZE,
+                BLOCK_NOISE_AMP,
+                BLOCK_NEURON_SIZE,
+                BLOCK_NOISE_MINOR_AMP,
+                MEASURE_NOISE_AMP,
+            )
+            write_values(result_file, *_res)
+            write_values(
+                param_file,
+                NR_NUM,
+                NR_OT_KAPPA,
+                NR_RECF_W,
+                CH_NUM,
+                CH_OT_KAPPA,
+                CH_RECF_W,
+                MEASUREMENT_GRID_SIZE,
+                BLOCK_NOISE_AMP,
+                BLOCK_NEURON_SIZE,
+                BLOCK_NOISE_MINOR_AMP,
+                MEASURE_NOISE_AMP,
+                REP,
+            )
+        except:
+            pass
     param_file.close()
     result_file.close()
