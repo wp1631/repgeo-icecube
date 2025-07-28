@@ -193,6 +193,7 @@ if __name__ == "__main__":
     param_file = open("param_file.txt", "w")
     result_file = open("metrics_file.txt", "w")
     err_file = open("err_file.txt", "w")
+    i = 1
     for (
         NR_NUM,
         NR_OT_KAPPA,
@@ -272,6 +273,8 @@ if __name__ == "__main__":
                 BLOCK_NOISE_MINOR_AMP,
                 MEASURE_NOISE_AMP,
             )
+        finally:
+            i += 1
     err_file.close()
     param_file.close()
     result_file.close()
