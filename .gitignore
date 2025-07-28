@@ -7,6 +7,11 @@ wheels/
 data/
 *.egg-info
 test.py
+
+metrics_file.txt
+param_file.txt
+err_file.txt
+
 # Virtual environments
 .venv/
 temp/
