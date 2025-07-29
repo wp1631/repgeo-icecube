@@ -28,4 +28,5 @@ def create_voxel_sampling(
         )
         all_channel.append(voxel_responses)
     measurement = np.hstack(all_channel)
+    measurement[np.isnan(measurement)] = 0
     return measurement

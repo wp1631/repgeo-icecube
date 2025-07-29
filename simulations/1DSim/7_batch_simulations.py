@@ -6,6 +6,7 @@ from utils.generators.noise import create_block_noise
 from utils.statistical_sampling import create_voxel_sampling
 from utils.iem import IEM1D
 from utils.rep_metrics import global_distance_variance, global_neigbor_dice, linear_CKA
+import traceback
 
 # Neuron Orientation Tuning
 NR_OT_LOC_MIN = -np.pi  # Neuron minimum orientation tuning location
@@ -28,20 +29,20 @@ CH_RECF_MAX = 3
 REPEAT_NUM = 100
 # Varying parameters
 ## Neuron
-SP_NR_NUM = np.logspace(1, 6, num=10, endpoint=True, dtype=np.int64)
-SP_NR_OT_KAPPA = np.logspace(-4, 4, num=10, endpoint=True)
-SP_NR_RECF_W = np.logspace(-5, 5, num=10, endpoint=True)
+SP_NR_NUM = np.logspace(1, 6, num=10, base=10, endpoint=True, dtype=np.int64)
+SP_NR_OT_KAPPA = np.logspace(-2, 2, num=10, endpoint=True)
+SP_NR_RECF_W = np.logspace(-3, 3, base=10, num=10, endpoint=True)
 ## Channel
-SP_CH_NUM = np.linspace(1, 50, endpoint=True, num=50, dtype=np.int64)
-SP_CH_OT_KAPPA = np.logspace(-4, 4, num=10, endpoint=True)
-SP_CH_RECF_W = np.logspace(-5, 5, num=10, endpoint=True)
+SP_CH_NUM = np.linspace(1, 50, endpoint=True, num=10, dtype=np.int64)
+SP_CH_OT_KAPPA = np.logspace(-2, 2, num=10, endpoint=True)
+SP_CH_RECF_W = np.logspace(-3, 3, base=10, num=10, endpoint=True)
 
 ## MEASUREMENT
 SP_MEASUREMENT_GRID_SIZE = np.linspace(
-    0.01, ST_LOC_MAX - ST_LOC_MIN, endpoint=True, num=20
+    0.05, ST_LOC_MAX - ST_LOC_MIN, endpoint=True, num=10
 )
 SP_BLOCK_NOISE_AMP = np.logspace(-2, 2, endpoint=True, base=10, num=5)
-SP_BLOCK_NEURON_SIZE = np.logspace(0, 5, endpoint=True, base=10, num=10, dtype=np.int64)
+SP_BLOCK_NEURON_SIZE = np.logspace(1, 5, endpoint=True, base=10, num=10, dtype=np.int64)
 SP_BLOCK_NOISE_MINOR_AMP = np.logspace(-2, 2, endpoint=True, base=10, num=5)
 SP_MEASUREMENT_NOISE_AMP = np.logspace(-2, 2, endpoint=True, base=10, num=5)
 
@@ -135,6 +136,7 @@ def generate_metrics(
     )
 
     block_noise_iem = IEM1D(channel_arr)
+
     block_noise_iem.fit(stimulus, block_noise_measurment)
     block_noisy_channel = block_noise_iem.decode(block_noise_measurment)
 
@@ -221,6 +223,7 @@ if __name__ == "__main__":
         SP_MEASUREMENT_NOISE_AMP,
         np.arange(REPEAT_NUM) + 1,
     ):
+        print(i)
         try:
             # write parameters_file
             _res = generate_metrics(
@@ -255,7 +258,7 @@ if __name__ == "__main__":
                 MEASURE_NOISE_AMP,
                 REP,
             )
-        except:
+        except Exception as e:
             write_values(
                 err_file,
                 NR_NUM,
@@ -273,6 +276,8 @@ if __name__ == "__main__":
                 BLOCK_NOISE_MINOR_AMP,
                 MEASURE_NOISE_AMP,
             )
+            print(traceback.format_exc())
+            break
         finally:
             i += 1
     err_file.close()
