@@ -4,6 +4,7 @@ from utils.generators.noise import create_block_noise
 from utils.statistical_sampling import create_voxel_sampling
 from utils.iem import IEM1D
 from utils.rep_metrics import global_distance_variance, global_neigbor_dice, linear_CKA
+import seaborn as sns
 
 TOTAL_SIMULATION = 50
 # cka
@@ -29,10 +30,10 @@ rc_mnd_list = []
 nc_mnd_list = []
 
 # Neuron Orientation Tuning
-NR_NUM = 3000
+NR_NUM = 3001
 NR_OT_LOC_MIN = -np.pi  # Neuron minimum orientation tuning location
 NR_OT_LOC_MAX = np.pi
-NR_OT_KAPPA = 5
+NR_OT_KAPPA = 10
 NR_LOC_W = 0.03
 
 # Stimulus sample
@@ -50,6 +51,9 @@ CH_OR_KAPPA = 3
 CH_RECF_WIDTH = 1
 CH_RECF_MIN = -3
 CH_RECF_MAX = 3
+
+MEASUREMENT_GRID_SIZE = 0.05
+
 for i in range(TOTAL_SIMULATION):
     # initialize the neuron values
     stimulus_ori = np.random.uniform(ST_OR_MIN, ST_OR_MAX, ST_NUM)
@@ -87,8 +91,6 @@ for i in range(TOTAL_SIMULATION):
     fisher_info = deriv_normed / np.sqrt(NR_NUM)
     sort_index = np.argsort(stimulus_ori)
 
-    MEASUREMENT_GRID_SIZE = 0.05
-
     measurement = create_voxel_sampling(
         neural_responses, neuron_recf_loc, MEASUREMENT_GRID_SIZE
     )
@@ -120,11 +122,8 @@ for i in range(TOTAL_SIMULATION):
     total_res = np.sum(residues)
     inv_weight = iem_obj.decode_weight
 
-    NEURONAL_NOISE_AMPLITUDE = 0.05
+    NEURONAL_NOISE_AMPLITUDE = 0.2
     MEASUREMENT_NOISE_AMPLITUDE = 0.1
-
-    base_signal_noise = np.random.normal(loc=0, scale=1, size=neural_responses.shape)
-    noisy_responses = neural_responses + NEURONAL_NOISE_AMPLITUDE * base_signal_noise
 
     base_measurement_noise = np.random.normal(loc=0, scale=1, size=measurement.shape)
     noisy_measurement = (
@@ -138,12 +137,14 @@ for i in range(TOTAL_SIMULATION):
 
     # ================Covariate Noise==================
     spatial_block_noise_response = neural_responses.copy()
-    spatial_block_noise_response[:, np.argsort(neuron_recf_loc)] += create_block_noise(
+    spatial_block_noise_response[
+        :, np.argsort(neuron_recf_loc)
+    ] += NEURONAL_NOISE_AMPLITUDE * create_block_noise(
         block_size=200,
         total_size=NR_NUM,
         observation=ST_NUM,
-        amplitude=0.2,
-        minor_amp=0.1,
+        amplitude=1,
+        minor_amp=0.3,
     )
 
     block_noise_measurment = create_voxel_sampling(
@@ -205,6 +206,31 @@ for item in zip(
     rc_lcka_list, nc_lcka_list, rn_lcka_list, mc_lcka_list, mr_lcka_list, mn_lcka_list
 ):
     ax.plot(item, alpha=0.3)
+plt.title("CKA")
+plt.xticks(
+    [0, 1, 2, 3, 4, 5],
+    [
+        "recon/channel",
+        "channel/neuron",
+        "recon/neuron",
+        "measure/channel",
+        "measure_recon",
+        "measure/neuron",
+    ],
+)
+plt.show()
+ax = plt.subplot()
+plot_df = pd.DataFrame(
+    zip(
+        rc_lcka_list,
+        nc_lcka_list,
+        rn_lcka_list,
+        mc_lcka_list,
+        mr_lcka_list,
+        mn_lcka_list,
+    )
+)
+sns.regplot(item, ax=ax)
 plt.title("CKA")
 plt.xticks(
     [0, 1, 2, 3, 4, 5],

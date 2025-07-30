@@ -19,6 +19,8 @@ def create_block_noise(
         ] += minor_amp * np.random.normal(0, 1, (observation, block_size))
     l = _noise[:, block_size * (_n) :].shape[1]
     if l > 0:
-        _noise[:, block_size * (_n) :] = np.random.normal((observation, 1))
-        _noise[:, block_size * (_n) :] += minor_amp * np.random.normal((observation, l))
+        _noise[:, block_size * (_n) :] = np.random.normal(0, 1, (observation, 1))
+        _noise[:, block_size * (_n) :] += minor_amp * np.random.normal(
+            0, 1, (observation, l)
+        )
     return amplitude * _noise
