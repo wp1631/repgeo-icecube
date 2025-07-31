@@ -6,8 +6,9 @@ from utils.iem import IEM1D
 from utils.rep_metrics import global_distance_variance, global_neigbor_dice, linear_CKA
 import seaborn as sns
 import pandas as pd
+from icecream import ic
 
-TOTAL_SIMULATION = 20
+TOTAL_SIMULATION = 30
 # cka
 mr_lcka_list = []
 mn_lcka_list = []
@@ -57,6 +58,7 @@ CH_RECF_MAX = ST_LOC_MAX
 MEASUREMENT_GRID_SIZE = 0.05
 
 for i in range(TOTAL_SIMULATION):
+    ic(i)
     # initialize the neuron values
     stimulus_ori = np.random.uniform(ST_OR_MIN, ST_OR_MAX, ST_NUM)
     stimulus_loc = np.random.uniform(ST_LOC_MIN, ST_LOC_MAX, ST_NUM)
@@ -201,6 +203,56 @@ for i in range(TOTAL_SIMULATION):
     mn_mnd_list.append(_[1])
     mn_mgd_list.append(_[2])
 
+import pandas as pd
+
+measurement_labels = [
+    "recon/channel",
+    "channel/neuron",
+    "recon/neuron",
+    "measure/channel",
+    "measure/recon",
+    "measure/neuron",
+]
+
+# CKA DataFrame
+lcka_df = pd.DataFrame(
+    list(
+        zip(
+            rc_lcka_list,
+            nc_lcka_list,
+            rn_lcka_list,
+            mc_lcka_list,
+            mr_lcka_list,
+            mn_lcka_list,
+        )
+    ),
+    columns=measurement_labels,
+)
+
+# Mean Neighbor Dice DataFrame
+mnd_df = pd.DataFrame(
+    list(
+        zip(
+            rc_mnd_list, nc_mnd_list, rn_mnd_list, mc_mnd_list, mr_mnd_list, mn_mnd_list
+        )
+    ),
+    columns=measurement_labels,
+)
+
+# Mean Global Displacement DataFrame
+mgd_df = pd.DataFrame(
+    list(
+        zip(
+            rc_mgd_list, nc_mgd_list, rn_mgd_list, mc_mgd_list, mr_mgd_list, mn_mgd_list
+        )
+    ),
+    columns=measurement_labels,
+)
+
+lcka_df.to_csv("result_lcka.csv")
+mnd_df.to_csv("result_mnd.csv")
+mgd_df.to_csv("result_mgd.csv")
+
 import matplotlib.pyplot as plt
 
 ax = plt.subplot()
@@ -208,30 +260,6 @@ for item in zip(
     rc_lcka_list, nc_lcka_list, rn_lcka_list, mc_lcka_list, mr_lcka_list, mn_lcka_list
 ):
     ax.plot(item, color="cyan", alpha=1)
-plt.title("CKA")
-plt.xticks(
-    [0, 1, 2, 3, 4, 5],
-    [
-        "recon/channel",
-        "channel/neuron",
-        "recon/neuron",
-        "measure/channel",
-        "measure_recon",
-        "measure/neuron",
-    ],
-)
-plt.show()
-ax = plt.subplot()
-plot_df = pd.DataFrame(
-    zip(
-        rc_lcka_list,
-        nc_lcka_list,
-        rn_lcka_list,
-        mc_lcka_list,
-        mr_lcka_list,
-        mn_lcka_list,
-    )
-)
 plt.title("CKA")
 plt.xticks(
     [0, 1, 2, 3, 4, 5],

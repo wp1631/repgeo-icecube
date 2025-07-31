@@ -12,6 +12,7 @@ metrics_file.txt
 param_file.txt
 err_file.txt
 
+result_*.csv
 # Virtual environments
 .venv/
 temp/
