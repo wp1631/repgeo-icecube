@@ -8,7 +8,7 @@ import seaborn as sns
 import pandas as pd
 from icecream import ic
 
-TOTAL_SIMULATION = 30
+TOTAL_SIMULATION = 20
 # cka
 mr_lcka_list = []
 mn_lcka_list = []
@@ -36,11 +36,11 @@ nc_mnd_list = []
 ST_NUM = 1000
 ST_OR_MIN = -np.pi  # stimulus.stimulus_orientation
 ST_OR_MAX = np.pi
-ST_LOC_MIN = -3
-ST_LOC_MAX = 3
+ST_LOC_MIN = -5
+ST_LOC_MAX = 5
 
 # Neuron Orientation Tuning
-NR_NUM = 3001
+NR_NUM = 10000
 NR_OT_LOC_MIN = ST_OR_MIN  # Neuron minimum orientation tuning location
 NR_OT_LOC_MAX = ST_OR_MAX
 NR_OT_KAPPA = 10
@@ -55,7 +55,7 @@ CH_RECF_WIDTH = 1
 CH_RECF_MIN = ST_LOC_MIN
 CH_RECF_MAX = ST_LOC_MAX
 
-MEASUREMENT_GRID_SIZE = 0.05
+MEASUREMENT_GRID_SIZE = 0.1
 
 for i in range(TOTAL_SIMULATION):
     ic(i)
@@ -144,7 +144,7 @@ for i in range(TOTAL_SIMULATION):
     spatial_block_noise_response[
         :, np.argsort(neuron_recf_loc)
     ] += NEURONAL_NOISE_AMPLITUDE * create_block_noise(
-        block_size=200,
+        block_size=1000,
         total_size=NR_NUM,
         observation=ST_NUM,
         amplitude=1,
@@ -154,6 +154,7 @@ for i in range(TOTAL_SIMULATION):
     block_noise_measurment = create_voxel_sampling(
         spatial_block_noise_response, neuron_recf_loc
     )
+    # TODO add measurement noise
 
     block_noise_iem = IEM1D(channel_arr)
     block_noise_iem.fit(stimulus, block_noise_measurment)

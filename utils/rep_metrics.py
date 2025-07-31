@@ -42,23 +42,16 @@ def linear_CKA(X: np.ndarray, Y: np.ndarray) -> float:
     )  # Add small constant to prevent divide by zero
 
 
-def global_distance_variance(
-    X: npt.NDArray[np.floating], Y: npt.NDArray[np.floating], normalize=True
-):
+def global_distance_variance(X: npt.NDArray[np.floating], Y: npt.NDArray[np.floating]):
     assert len(X) == len(Y)
-    l = len(X)
     X_pdist = pdist(X)
+    X_pdist_normed = X_pdist / np.max(X_pdist)
     Y_pdist = pdist(Y)
-    X_dist = squareform(X_pdist)
-    Y_dist = squareform(Y_pdist)
-    if normalize:
-        X_dist = X_dist / np.max(X_dist)
-        Y_dist = Y_dist / np.max(Y_dist)
-    dist_list = []
-    for i in range(l):
-        _X, _Y = X_dist[i], Y_dist[i]
-        dist_list.append(np.linalg.norm(_X - _Y))
-    return np.mean(dist_list) / np.sqrt(X.shape[1])
+    Y_pdist_normed = Y_pdist / np.max(Y_pdist)
+    diff = X_pdist_normed - Y_pdist_normed
+    diff_sq = np.power(diff, 2)
+    sum_sq = np.sqrt(np.sum(diff_sq))
+    return sum_sq / np.sqrt(X.shape[1])
 
 
 def global_neigbor_dice(
@@ -66,7 +59,7 @@ def global_neigbor_dice(
     Y: npt.NDArray[np.floating],
     *,
     sort_index: Optional[npt.NDArray] = None,
-    dist_ratio_threshold: float = 0.2,
+    dist_ratio_threshold: float = 20,
 ):
     assert len(X) == len(Y)
     l = len(X)
