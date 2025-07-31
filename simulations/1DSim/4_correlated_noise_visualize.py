@@ -16,6 +16,7 @@ from utils.statistical_sampling import create_voxel_sampling
 from utils.iem import IEM1D
 import matplotlib.pyplot as plt
 from utils.rep_metrics import global_distance_variance, global_neigbor_dice, linear_CKA
+import matplotlib.pyplot as plt
 
 # ============Define Parameters==============
 NR_NUM = 3000
@@ -27,7 +28,7 @@ NR_OT_KAPPA = 5
 NR_LOC_W = 0.03
 
 # Stimulus sample
-ST_NUM = 1000
+ST_NUM = 500
 ST_OR_MIN = -np.pi  # stimulus.stimulus_orientation
 ST_OR_MAX = np.pi
 ST_LOC_MIN = -10
@@ -39,7 +40,7 @@ CH_OR_LOC_MIN = -np.pi
 CH_OR_LOC_MAX = np.pi
 CH_OR_KAPPA = 3
 CH_RECF_WIDTH = 3
-CH_RECF_MIN = ST_LOC_MAX
+CH_RECF_MIN = ST_LOC_MIN
 CH_RECF_MAX = ST_LOC_MAX
 
 MEASUREMENT_GRID_SIZE = 0.05
@@ -68,6 +69,10 @@ stimulus = Stimulus1D(
     stimulus_contrast=stimulus_contrast,
     stimulus_size=stimulus_size,
 )
+
+plt.scatter(neuron_recf_loc, neuron_tuning_loc, s=2)
+plt.title("Tuning vs Receptive field")
+plt.show()
 
 
 neuron_arr = NeuronArray1D(
@@ -151,11 +156,11 @@ plot_orientation_fisher_information(stimulus, fisher_info)
 
 plot_mds(neural_responses, c=stimulus.stimulus_orientation)
 
-plot_mds(
-    deriv,
-    c=stimulus.stimulus_orientation,
-    title="MDS Embedding of the Gradient (3D)",
-)
+# plot_mds(
+#     deriv,
+#     c=stimulus.stimulus_orientation,
+#     title="MDS Embedding of the Gradient (3D)",
+# )
 
 plot_RDM(neural_responses, sort_index)
 
@@ -176,6 +181,10 @@ channel_tuning_amp = np.full(CH_NUM, 1)
 channel_recf_loc = np.random.uniform(CH_RECF_MIN, CH_RECF_MAX, CH_NUM)
 channel_recf_width = np.full(CH_NUM, CH_RECF_WIDTH)
 
+plt.scatter(channel_recf_loc, channel_tuning_loc, s=2)
+plt.title("Channel Tuning vs Receptive field")
+plt.show()
+
 channel_arr = NeuronArray1D(
     tuning_loc=channel_tuning_loc,
     tuning_kappa=channel_tuning_kappa,
@@ -190,7 +199,7 @@ plot_mds(
     c=stimulus.stimulus_orientation,
     title="MDS Embedding of Channel Activation (3D)",
 )
-plot_RDM(channel_activation, sort_index, title="Channel activation RDM")
+plot_RDM(channel_activation, sort_index)
 plot_pca_scree(channel_activation, title="Scree plot channel activation")
 
 iem_obj = IEM1D(channel_arr)
