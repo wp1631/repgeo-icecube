@@ -27,20 +27,26 @@ NR_OT_KAPPA = 5
 NR_LOC_W = 0.03
 
 # Stimulus sample
-ST_NUM = 500
+ST_NUM = 1000
 ST_OR_MIN = -np.pi  # stimulus.stimulus_orientation
 ST_OR_MAX = np.pi
-ST_LOC_MIN = -3
-ST_LOC_MAX = 3
+ST_LOC_MIN = -10
+ST_LOC_MAX = 10
 
 # Channel paraneters
 CH_NUM = 6
 CH_OR_LOC_MIN = -np.pi
 CH_OR_LOC_MAX = np.pi
 CH_OR_KAPPA = 3
-CH_RECF_WIDTH = 100
-CH_RECF_MIN = -3
-CH_RECF_MAX = 3
+CH_RECF_WIDTH = 3
+CH_RECF_MIN = ST_LOC_MAX
+CH_RECF_MAX = ST_LOC_MAX
+
+MEASUREMENT_GRID_SIZE = 0.05
+
+NEURONAL_NOISE_AMPLITUDE = 0.05
+BLOCK_MINOR_NOISE_AMPLITUDE = 0.3
+MEASUREMENT_NOISE_AMPLITUDE = 0.02
 # ============Data Generation==============
 
 # initialize the neuron values
@@ -157,7 +163,6 @@ plot_representational_distance(stimulus.stimulus_orientation, neural_responses)
 
 plot_pca_scree(neural_responses)
 
-MEASUREMENT_GRID_SIZE = 0.1
 
 measurement = create_voxel_sampling(
     neural_responses, neuron_recf_loc, MEASUREMENT_GRID_SIZE
@@ -185,8 +190,8 @@ plot_mds(
     c=stimulus.stimulus_orientation,
     title="MDS Embedding of Channel Activation (3D)",
 )
-plot_RDM(channel_activation, sort_index)
-plot_pca_scree(channel_activation)
+plot_RDM(channel_activation, sort_index, title="Channel activation RDM")
+plot_pca_scree(channel_activation, title="Scree plot channel activation")
 
 iem_obj = IEM1D(channel_arr)
 iem_obj.fit(stimulus, measurement)
@@ -232,8 +237,6 @@ plot_representational_distance(
 
 ## Noisy Encoding
 
-NEURONAL_NOISE_AMPLITUDE = 0.005
-MEASUREMENT_NOISE_AMPLITUDE = 0.02
 
 base_signal_noise = np.random.normal(loc=0, scale=1, size=neural_responses.shape)
 noisy_responses = neural_responses + NEURONAL_NOISE_AMPLITUDE * base_signal_noise
@@ -247,7 +250,7 @@ plot_mds(
     title="MDS Embedding of Noisy Neural Responses (3D)",
 )
 plot_RDM(noisy_responses, sort_index)
-plot_pca_scree(noisy_responses)
+plot_pca_scree(noisy_responses, title="Scree plot: Noisy Neural Responses Scree plot")
 
 plot_mds(
     noisy_measurement,
@@ -255,7 +258,7 @@ plot_mds(
     title="MDS Embedding of Noisy Measurement (3D)",
 )
 plot_RDM(noisy_measurement, sort_index)
-plot_pca_scree(noisy_measurement)
+plot_pca_scree(noisy_measurement, title="Scree plot: Noisy measurement")
 
 noisy_iem = IEM1D(channel_arr)
 noisy_iem.fit(stimulus, noisy_measurement)
@@ -268,12 +271,18 @@ plot_mds(
     title="Noisy Reconstructed MDS (3D)",
 )
 plot_RDM(noisy_reconstruct_channel, sort_index)
-plot_pca_scree(noisy_reconstruct_channel)
+plot_pca_scree(noisy_reconstruct_channel, title="Scree plot: noisy reconstruction")
 # ================Covariate Noise==================
 
 spatial_block_noise_response = neural_responses.copy()
-spatial_block_noise_response[:, np.argsort(neuron_recf_loc)] += create_block_noise(
-    block_size=200, total_size=NR_NUM, observation=ST_NUM
+spatial_block_noise_response[
+    :, np.argsort(neuron_recf_loc)
+] += MEASUREMENT_NOISE_AMPLITUDE * create_block_noise(
+    block_size=200,
+    total_size=NR_NUM,
+    observation=ST_NUM,
+    amplitude=1,
+    minor_amp=BLOCK_MINOR_NOISE_AMPLITUDE,
 )
 
 plot_mds(
@@ -285,7 +294,9 @@ plot_RDM(
     spatial_block_noise_response,
     sort_index,
 )
-plot_pca_scree(spatial_block_noise_response)
+plot_pca_scree(
+    spatial_block_noise_response, title="Scree plot: spatial block neuronal noise"
+)
 
 recf_block_noise_measure = create_voxel_sampling(
     spatial_block_noise_response, neuron_recf_loc, MEASUREMENT_GRID_SIZE
@@ -299,7 +310,9 @@ plot_RDM(
     recf_block_noise_measure,
     sort_index,
 )
-plot_pca_scree(recf_block_noise_measure)
+plot_pca_scree(
+    recf_block_noise_measure, title="Scree plot: fMRI block noise measurement"
+)
 
 block_noise_iem = IEM1D(channel_arr)
 block_noise_iem.fit(stimulus, recf_block_noise_measure)
@@ -314,4 +327,7 @@ plot_RDM(
     block_noisy_channel_recon,
     sort_index,
 )
-plot_pca_scree(block_noisy_channel_recon)
+plot_pca_scree(
+    block_noisy_channel_recon,
+    title="Scree plot: Channel reconstruction - fMRI block measurement",
+)

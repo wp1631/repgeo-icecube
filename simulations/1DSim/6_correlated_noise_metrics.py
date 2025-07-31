@@ -5,6 +5,7 @@ from utils.statistical_sampling import create_voxel_sampling
 from utils.iem import IEM1D
 from utils.rep_metrics import global_distance_variance, global_neigbor_dice, linear_CKA
 import seaborn as sns
+import pandas as pd
 
 TOTAL_SIMULATION = 50
 # cka

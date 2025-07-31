@@ -421,7 +421,8 @@ def plot_RDM(
     p_dist = pdist(neural_responses_sorted)
     dist_mat = squareform(p_dist)
 
-    _ax.imshow(dist_mat, aspect="auto", cmap=cmap)
+    _ax.imshow(dist_mat, aspect="auto", norm=True)
+    plt.colorbar()
     if (ax is None) and (fig is None):
         plt.show()
 
