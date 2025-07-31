@@ -7,7 +7,7 @@ from utils.rep_metrics import global_distance_variance, global_neigbor_dice, lin
 import seaborn as sns
 import pandas as pd
 
-TOTAL_SIMULATION = 50
+TOTAL_SIMULATION = 20
 # cka
 mr_lcka_list = []
 mn_lcka_list = []
@@ -30,12 +30,6 @@ rn_mnd_list = []
 rc_mnd_list = []
 nc_mnd_list = []
 
-# Neuron Orientation Tuning
-NR_NUM = 3001
-NR_OT_LOC_MIN = -np.pi  # Neuron minimum orientation tuning location
-NR_OT_LOC_MAX = np.pi
-NR_OT_KAPPA = 10
-NR_LOC_W = 0.03
 
 # Stimulus sample
 ST_NUM = 1000
@@ -44,14 +38,21 @@ ST_OR_MAX = np.pi
 ST_LOC_MIN = -3
 ST_LOC_MAX = 3
 
+# Neuron Orientation Tuning
+NR_NUM = 3001
+NR_OT_LOC_MIN = ST_OR_MIN  # Neuron minimum orientation tuning location
+NR_OT_LOC_MAX = ST_OR_MAX
+NR_OT_KAPPA = 10
+NR_LOC_W = 0.03
+
 # Channel paraneters
 CH_NUM = 12
 CH_OR_LOC_MIN = -np.pi
 CH_OR_LOC_MAX = np.pi
 CH_OR_KAPPA = 3
 CH_RECF_WIDTH = 1
-CH_RECF_MIN = -3
-CH_RECF_MAX = 3
+CH_RECF_MIN = ST_LOC_MIN
+CH_RECF_MAX = ST_LOC_MAX
 
 MEASUREMENT_GRID_SIZE = 0.05
 
@@ -206,7 +207,7 @@ ax = plt.subplot()
 for item in zip(
     rc_lcka_list, nc_lcka_list, rn_lcka_list, mc_lcka_list, mr_lcka_list, mn_lcka_list
 ):
-    ax.plot(item, alpha=0.3)
+    ax.plot(item, color="cyan", alpha=1)
 plt.title("CKA")
 plt.xticks(
     [0, 1, 2, 3, 4, 5],
@@ -231,7 +232,6 @@ plot_df = pd.DataFrame(
         mn_lcka_list,
     )
 )
-sns.regplot(item, ax=ax)
 plt.title("CKA")
 plt.xticks(
     [0, 1, 2, 3, 4, 5],
