@@ -8,7 +8,7 @@ import seaborn as sns
 import pandas as pd
 from icecream import ic
 
-TOTAL_SIMULATION = 20
+TOTAL_SIMULATION = 30
 # cka
 mr_lcka_list = []
 mn_lcka_list = []
@@ -55,7 +55,8 @@ CH_RECF_WIDTH = 1
 CH_RECF_MIN = ST_LOC_MIN
 CH_RECF_MAX = ST_LOC_MAX
 
-MEASUREMENT_GRID_SIZE = 0.1
+MEASUREMENT_GRID_SIZE = 1
+MEASUREMENT_NOISE_AMPLITUDE = 0.5
 
 for i in range(TOTAL_SIMULATION):
     ic(i)
@@ -154,7 +155,10 @@ for i in range(TOTAL_SIMULATION):
     block_noise_measurment = create_voxel_sampling(
         spatial_block_noise_response, neuron_recf_loc
     )
-    # TODO add measurement noise
+
+    block_noise_measurment += np.random.normal(
+        loc=0, scale=MEASUREMENT_NOISE_AMPLITUDE, size=block_noise_measurment.shape
+    )
 
     block_noise_iem = IEM1D(channel_arr)
     block_noise_iem.fit(stimulus, block_noise_measurment)
